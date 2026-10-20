@@ -111,7 +111,7 @@ test("flower, caption, controls, and greeting stay separated across responsive v
     await page.setViewportSize({ width, height });
     await expect(page.locator(".story-panel")).toHaveCSS("order", width <= 800 ? "1" : "0");
     if (width <= 800) {
-      const expectedFrameHeight = width <= 350 ? 290 : width <= 480 ? 330 : Math.round(Math.min(450, Math.max(300, height * 0.45)));
+      const expectedFrameHeight = width <= 350 ? 320 : width <= 480 ? 380 : Math.round(Math.min(480, Math.max(360, height * 0.66)));
       await expect.poll(async () => Math.round(await page.locator(".flower-frame").evaluate((element) => element.getBoundingClientRect().height))).toBe(expectedFrameHeight);
     }
     const layout = await page.evaluate(() => {

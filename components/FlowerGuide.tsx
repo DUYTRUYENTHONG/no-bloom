@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Locale } from "@/lib/content";
 import dynamic from "next/dynamic";
+import { ActorIntroduction } from "./ActorIntroduction";
 const DanceMoment = dynamic(() => import("./DanceMoment").then((module) => module.DanceMoment), { ssr: false });
 
 type Stage = "invitation" | "personalization" | "blooming" | "greeting" | "withering";
@@ -41,6 +42,7 @@ export function FlowerGuide({ locale, stage }: { locale: Locale; stage: Stage })
   const [busy, setBusy] = useState(false);
   const [acting, setActing] = useState(false);
   const [dancing, setDancing] = useState(false);
+  const [introducing, setIntroducing] = useState(false);
   const actor = useRef<HTMLSpanElement>(null);
   const pointerActor = useRef<HTMLSpanElement>(null);
   const abort = useRef<AbortController | null>(null);
@@ -115,7 +117,8 @@ export function FlowerGuide({ locale, stage }: { locale: Locale; stage: Stage })
     } finally { if (!controller.signal.aborted) setBusy(false); }
   }
 
-  return <aside className={`flower-guide ${open ? "is-open" : ""} ${dancing ? "is-dancing" : ""}`} aria-label={t.title}>
+  return <aside className={`flower-guide ${open ? "is-open" : ""} ${dancing ? "is-dancing" : ""} ${introducing ? "is-introducing" : ""}`} aria-label={t.title}>
+    <ActorIntroduction locale={locale} stage={stage} dock={trigger} onActiveChange={setIntroducing} />
     {open && <div ref={panel} id="flower-guide-panel" className="guide-panel" role="dialog" aria-labelledby="flower-guide-title" tabIndex={-1} onKeyDown={(event) => { if (event.key === "Escape") { event.stopPropagation(); close(); } }}>
       <div className="guide-heading"><strong id="flower-guide-title">{t.title}</strong><button ref={closeButton} type="button" onClick={close} aria-label={t.close}>×</button></div>
       <p className="guide-intro">{t.intro} {t.stage[stage]}</p>

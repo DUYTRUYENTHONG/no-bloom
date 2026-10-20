@@ -53,9 +53,9 @@ form .primary-button{margin-top:26px}
 .mode-button{border:0;background:transparent;color:var(--plum);font-size:12px;text-decoration:underline;text-underline-offset:4px;margin:20px auto 0;padding:8px}
 .mode-button:disabled{color:#816e75;cursor:default;text-decoration:none}
 .mode-note{font-size:12px;line-height:1.4;text-align:center;color:#66535c;max-width:290px;margin:0 auto}
-@media(max-width:800px){.site-header{height:72px}.experience-grid{min-height:calc(100svh - 72px);grid-template-columns:minmax(0,1fr);gap:0;padding-bottom:24px}.story-panel{min-height:unset;padding-top:24px;order:1}.flower-panel{min-height:350px;overflow:hidden;order:0;padding-bottom:16px}.flower-frame{height:clamp(300px,45vh,450px);min-height:300px}.flower-halo{inset:4% 14% 7%}.flower-caption{margin-top:-16px}.mode-button{margin-top:8px}.story-content{padding:26px 0 42px;margin:0}.eyebrow{position:static;margin-bottom:14px}.overline{display:none}h1{font-size:clamp(40px,8vw,60px)}.supporting{margin:20px 0 25px}.story-footer{padding-bottom:10px}.greeting-content h1{font-size:clamp(37px,6vw,52px)}.letter{margin:21px 0;padding:25px 28px}.greeting-actions{gap:18px}}
-@media(max-width:480px){.site-header{padding:0 22px}.experience-grid{padding-left:22px;padding-right:22px}.flower-panel{min-height:330px}.flower-frame{height:330px;min-height:330px}.flower-caption{font-size:9px}.story-panel{padding-top:28px}.eyebrow{font-size:10px;letter-spacing:.12em}.story-content{padding:16px 0 32px}h1{font-size:clamp(38px,11vw,52px)}.supporting{font-size:15px}.primary-button{min-height:54px}.greeting-content h1{font-size:clamp(34px,9vw,45px)}.letter{padding:24px 24px 22px}.letter p{font-size:14px}.story-footer{font-size:9px}.footer-rule{width:40px}}
-@media(max-width:350px){.flower-panel{min-height:290px}.flower-frame{height:290px;min-height:290px}.story-content{padding-top:12px}h1{font-size:36px}.letter{padding:20px}.greeting-actions .primary-button{width:100%}}
+@media(max-width:800px){.site-header{height:72px}.experience-grid{min-height:calc(100svh - 72px);grid-template-columns:minmax(0,1fr);gap:0;padding-bottom:24px}.story-panel{min-height:unset;padding-top:24px;order:1}.flower-panel{min-height:350px;overflow:hidden;order:0;padding-bottom:16px}.flower-frame{height:clamp(360px,66svh,480px);min-height:360px;max-width:480px;margin-inline:auto}.flower-halo{inset:4% 14% 7%}.flower-caption{margin-top:16px}.mode-button{margin-top:8px}.story-content{padding:26px 0 42px;margin:0}.eyebrow{position:static;margin-bottom:14px}.overline{display:none}h1{font-size:clamp(40px,8vw,60px)}.supporting{margin:20px 0 25px}.story-footer{padding-bottom:10px}.greeting-content h1{font-size:clamp(37px,6vw,52px)}.letter{margin:21px 0;padding:25px 28px}.greeting-actions{gap:18px}}
+@media(max-width:480px){.site-header{padding:0 22px}.experience-grid{padding-left:22px;padding-right:22px}.flower-panel{min-height:330px}.flower-frame{height:380px;min-height:380px;max-width:100%}.flower-caption{font-size:9px}.story-panel{padding-top:28px}.eyebrow{font-size:10px;letter-spacing:.12em}.story-content{padding:16px 0 32px}h1{font-size:clamp(38px,11vw,52px)}.supporting{font-size:15px}.primary-button{min-height:54px}.greeting-content h1{font-size:clamp(34px,9vw,45px)}.letter{padding:24px 24px 22px}.letter p{font-size:14px}.story-footer{font-size:9px}.footer-rule{width:40px}}
+@media(max-width:350px){.flower-panel{min-height:290px}.flower-frame{height:320px;min-height:320px}.story-content{padding-top:12px}h1{font-size:36px}.letter{padding:20px}.greeting-actions .primary-button{width:100%}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
 
 /* Botanical editorial direction, inspired by the supplied rose reference. */
@@ -102,9 +102,9 @@ input:focus{border-color:#e0f395;box-shadow:0 2px 0 #e0f395}
 .flower-caption{position:relative;z-index:2;margin-top:8px}
 .rose-bloom{position:absolute;inset:0;overflow:hidden;isolation:isolate;pointer-events:auto}
 .rose-canvas{position:absolute!important;inset:0;width:100%!important;height:100%!important;pointer-events:none!important}
-.static-rose-fallback{position:absolute;inset:0;display:grid;place-items:center;overflow:hidden;background:#071008}
-.static-rose-fallback img{width:100%;height:100%;object-fit:contain;object-position:center center;display:block;mask-image:linear-gradient(to bottom,transparent,#000 8%,#000 91%,transparent)}
-.static-rose-fallback svg{width:100%;height:100%;display:block}
+.static-rose-fallback{position:absolute;inset:0;min-width:0;min-height:0;overflow:hidden;background:#071008}
+.static-rose-fallback img{position:absolute;inset:12px;width:calc(100% - 24px);height:calc(100% - 24px);min-width:0;min-height:0;max-width:100%;max-height:100%;object-fit:contain;object-position:center;display:block}
+.static-rose-fallback svg{position:absolute;inset:12px;width:calc(100% - 24px);height:calc(100% - 24px);display:block}
 .rose-inspector{position:absolute;left:8px;bottom:8px;z-index:4;width:min(280px,calc(100% - 16px));max-height:65%;overflow:auto;background:#071008ed;border:1px solid #b5d34b;color:#f7f3e9;padding:12px;font-size:12px;pointer-events:auto;display:grid;gap:8px}
 .rose-inspector label{display:flex;gap:7px;align-items:center}
 .rose-inspector input[type=range]{height:auto;flex:1}
@@ -180,3 +180,13 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 @keyframes dance-sway{from{transform:translateX(-3px) rotate(-2deg)}to{transform:translateX(3px) rotate(2deg)}}
 @media(prefers-reduced-motion:reduce){.guide-dance-sprite{animation:none;transform:none;background-position:33.333% 0}}
 
+/* Finite introduction uses fixed, reserved artwork; transforms never move page layout. */
+.actor-introduction{position:fixed;inset:0;pointer-events:none!important;visibility:hidden;z-index:46}
+.actor-introduction.is-active{visibility:visible}
+.actor-introduction>img{position:absolute;left:0;top:0;object-fit:contain;transform-origin:0 0;pointer-events:none}
+.actor-introduction.is-active>img{will-change:transform,opacity}
+.actor-introduction-note{position:absolute;left:max(16px,env(safe-area-inset-left));top:max(86px,env(safe-area-inset-top));max-width:min(280px,calc(100vw - 32px));padding:12px 16px;background:#f7f3e9;color:#14220c;border:1px solid #b5d34b;border-radius:16px;box-shadow:0 5px 20px #0003;pointer-events:auto}
+.actor-introduction-note p{margin:0;font:clamp(18px,3vw,23px)/1.3 var(--serif)}
+.actor-introduction-note button{min-height:44px;padding:8px 0;border:0;background:transparent;color:#354a18;text-decoration:underline;text-underline-offset:4px;font-size:14px}
+.flower-guide.is-introducing .guide-actor-button img{opacity:0}
+@media(prefers-reduced-motion:reduce){.actor-introduction{display:none!important}.flower-guide.is-introducing .guide-actor-button img{opacity:1}}

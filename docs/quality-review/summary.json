@@ -1,76 +1,77 @@
 {
-  "checkedAt": "2026-10-20T07:30:14.777Z",
-  "sourceFingerprint": "b2642e7ef6d35d6fd3c35d8299b3efd53f040d07b2dd7e764ac0313c53adffd6",
+  "checkedAt": "2026-10-20T07:53:54.158Z",
+  "sourceFingerprint": "3b374a85cb4151e88e818a7441b84f1011f850124b0c5534eac5bbd77938e33a",
   "overall": "BLOCKED",
   "reason": "Performance target remains unmet; feature branch may be reviewed, production readiness is not claimed.",
   "gates": {
     "fast": {
-      "checkedAt": "2026-10-20T07:21:24.193Z",
-      "sourceFingerprint": "a53c58fbf4aae547088dd16b9bd5bd12be6a76cbbed314311c38cfa85c4b050d",
+      "checkedAt": "2026-10-20T07:46:22.310Z",
+      "sourceFingerprint": "1a7b8bf9b606dae8741b88f0447518bf218b1b5f7814cb7d6ab3159ad2c34f6c",
       "status": "PASS"
     },
     "build": {
-      "checkedAt": "2026-10-20T07:29:55.449Z",
-      "sourceFingerprint": "b2642e7ef6d35d6fd3c35d8299b3efd53f040d07b2dd7e764ac0313c53adffd6",
+      "checkedAt": "2026-10-20T07:49:59.711Z",
+      "sourceFingerprint": "3b374a85cb4151e88e818a7441b84f1011f850124b0c5534eac5bbd77938e33a",
       "status": "PASS"
     },
     "journeys": {
-      "checkedAt": "2026-10-20T07:22:09.455Z",
-      "sourceFingerprint": "a53c58fbf4aae547088dd16b9bd5bd12be6a76cbbed314311c38cfa85c4b050d",
+      "checkedAt": "2026-10-20T07:49:52.131Z",
+      "sourceFingerprint": "3b374a85cb4151e88e818a7441b84f1011f850124b0c5534eac5bbd77938e33a",
       "status": "PASS"
     },
     "a11y": {
-      "checkedAt": "2026-10-20T07:22:26.211Z",
-      "sourceFingerprint": "a53c58fbf4aae547088dd16b9bd5bd12be6a76cbbed314311c38cfa85c4b050d",
+      "checkedAt": "2026-10-20T07:50:14.703Z",
+      "sourceFingerprint": "3b374a85cb4151e88e818a7441b84f1011f850124b0c5534eac5bbd77938e33a",
       "status": "PASS"
     },
     "visual": {
-      "checkedAt": "2026-10-20T07:22:52.234Z",
-      "sourceFingerprint": "a53c58fbf4aae547088dd16b9bd5bd12be6a76cbbed314311c38cfa85c4b050d",
+      "checkedAt": "2026-10-20T07:50:30.036Z",
+      "sourceFingerprint": "3b374a85cb4151e88e818a7441b84f1011f850124b0c5534eac5bbd77938e33a",
       "status": "PASS"
     },
     "motion": {
-      "checkedAt": "2026-10-20T07:23:14.436Z",
-      "sourceFingerprint": "a53c58fbf4aae547088dd16b9bd5bd12be6a76cbbed314311c38cfa85c4b050d",
+      "checkedAt": "2026-10-20T07:50:47.246Z",
+      "sourceFingerprint": "3b374a85cb4151e88e818a7441b84f1011f850124b0c5534eac5bbd77938e33a",
       "status": "PASS"
     },
     "performance": {
-      "checkedAt": "2026-10-20T07:26:05.948Z",
-      "sourceFingerprint": "a53c58fbf4aae547088dd16b9bd5bd12be6a76cbbed314311c38cfa85c4b050d",
+      "checkedAt": "2026-10-20T07:53:10.680Z",
+      "sourceFingerprint": "3b374a85cb4151e88e818a7441b84f1011f850124b0c5534eac5bbd77938e33a",
       "status": "FAIL",
       "error": "Error: QA child exited 1"
     }
   },
   "performance": {
     "lcpMs": {
-      "median": 5652,
-      "min": 5448,
-      "max": 5964
+      "median": 5192,
+      "min": 5188,
+      "max": 5192
     },
     "cls": {
-      "median": 0.011813586943844996,
-      "min": 0.011813586943844996,
-      "max": 0.011813586943844996
+      "median": 0.01015075525796239,
+      "min": 0.01015075525796239,
+      "max": 0.01015075525796239
     },
     "observedTransferBytes": {
-      "median": 945324,
-      "min": 945324,
-      "max": 945324
+      "median": 949935,
+      "min": 949935,
+      "max": 950813
     },
     "clickToFieldMs": {
-      "median": 596.3508999999976,
-      "min": 301.7723999999871,
-      "max": 1114.3516999999993
+      "median": 294.9982000000018,
+      "min": 293.85379999999714,
+      "max": 323.3087999999989
     },
     "longestTaskMs": {
-      "median": 704,
-      "min": 517,
-      "max": 913
+      "median": 193,
+      "min": 184,
+      "max": 261
     }
   },
   "independentReview": {
     "motion": "PASS, no remaining P1; procedural faceting remains",
-    "journey": "No P0/P1; focus and failed-player cleanup P2 findings corrected"
+    "journey": "No P0/P1; focus and failed-player cleanup P2 findings corrected",
+    "framing": "PASS: read-only senior designer accepted six bud/open captures at665,390,320; no remaining P1 crop. Full-page CTA/actor behavior covered separately by journeys."
   },
   "notRun": [
     "Connected Supabase/Groq",
@@ -89,5 +90,14 @@
     "counter": "PASS local stub",
     "guide": "PASS isolated guide configuration: request/name isolation and axe"
   },
-  "evidenceDelta": "After the complete run, only scripts/test-exported-guide.mjs changed to use explicit browser.newContext required by axe. That check and the default static build were rerun successfully. Prior full-run receipts retain their exact earlier fingerprints; application, scene and performance source did not change."
+  "evidenceDelta": "Actor introduction and complete flower framing added. Final current-source build,56 Chromium/WebKit journeys,axe,27 visual captures,motion and3 cold loads completed. Fast/unit gate was run immediately before the final test-only update to the expected reviewed frame heights; application source did not change after that unit run. Its earlier exact fingerprint is preserved. No failed gate was relabeled.",
+  "interactionEvidence": {
+    "manifest": "artifacts/quality/interaction-manifest.json",
+    "captureCount": 34,
+    "tests": "14 framing +16 intro included within56 total browser journeys",
+    "briefs": [
+      "docs/motion/actor-introduction.md",
+      "docs/motion/flower-framing.md"
+    ]
+  }
 }
