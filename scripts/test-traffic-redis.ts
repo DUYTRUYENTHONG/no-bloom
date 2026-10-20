@@ -73,6 +73,7 @@ async function cleanup(ns: string) { let cursor = '0'; let removed = 0; do {
     if (keys.length)
         await command(['DEL', ...keys]);
 } while (cursor !== '0'); }
+async function main() {
 try {
     assert.equal(await command(['PING']), 'PONG');
     const ns = namespace(), store = createTrafficStore(command, ns, 1000, 100000), t = Date.parse('2026-10-20T23:59:59Z'), next = t + 1000, A = 'a'.repeat(64), B = 'b'.repeat(64), eventId = randomUUID();
@@ -126,3 +127,5 @@ finally {
     for (const ns of namespaces)
         await cleanup(ns);
 }
+}
+void main().catch(error => { console.error(error); process.exitCode = 1; });

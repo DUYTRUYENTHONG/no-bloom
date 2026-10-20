@@ -1,5 +1,6 @@
 import { createRedisCommand } from '../services/traffic/lib/store';
 import { createHmac } from 'node:crypto';
+async function main() {
 const env = process.env, command = createRedisCommand(env.KV_REST_API_URL ?? '', env.KV_REST_API_TOKEN ?? '');
 const namespace = env.TRAFFIC_NAMESPACE ?? 'no-bloom:traffic:v1';
 if (!/^no-bloom:traffic:(?:staging:)?v1$/.test(namespace))
@@ -39,3 +40,5 @@ else {
     }
     console.log(JSON.stringify({ timezone: 'UTC', interval: { startInclusive: start, endExclusive: end }, startedAt: started ?? null, pageViews: Number(views ?? 0), approximateUniqueBrowsers: Number(browsers), daily, topPaths: object(paths), countryPageViews: object(countries), note: 'Consenting accepted traffic only. Browsers are not people. Daily uniques must not be summed into interval uniques.' }, null, 2));
 }
+}
+void main().catch(error => { console.error(error instanceof Error ? error.message : 'Traffic reporting failed'); process.exitCode = 1; });
