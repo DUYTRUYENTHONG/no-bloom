@@ -1,80 +1,83 @@
 {
-  "checkedAt": "2026-10-20T09:43:01.899Z",
-  "sourceFingerprint": "185e3cbc84d16df3a17198f334ad149628eeb4b14d0338642684280590443c83",
+  "checkedAt": "2026-10-20T11:20:05.693Z",
+  "sourceFingerprint": "d77a6847cb5621d8ef858dda25d4683c50baabba5bde2c9b179f0673905dac1e",
   "overall": "PASS",
-  "scope": "Local floral gift, authored compliment celebration and mobile actor correction; feature branch only.",
+  "scope": "Visitor counter implementation and static frontend release; Vercel/Upstash provisioning pending.",
   "readyForProduction": false,
   "gates": {
     "fast": {
-      "checkedAt": "2026-10-20T09:34:59.468Z",
-      "sourceFingerprint": "185e3cbc84d16df3a17198f334ad149628eeb4b14d0338642684280590443c83",
+      "checkedAt": "2026-10-20T11:12:50.232Z",
+      "sourceFingerprint": "5082176012307475c028b4955d7aeff8643194e1ff5106c5ef86e0e859ebf30f",
       "status": "PASS"
     },
     "build": {
-      "checkedAt": "2026-10-20T09:35:12.722Z",
-      "sourceFingerprint": "185e3cbc84d16df3a17198f334ad149628eeb4b14d0338642684280590443c83",
+      "checkedAt": "2026-10-20T11:19:13.684Z",
+      "sourceFingerprint": "d77a6847cb5621d8ef858dda25d4683c50baabba5bde2c9b179f0673905dac1e",
       "status": "PASS"
     },
     "journeys": {
-      "checkedAt": "2026-10-20T09:38:48.760Z",
-      "sourceFingerprint": "185e3cbc84d16df3a17198f334ad149628eeb4b14d0338642684280590443c83",
+      "checkedAt": "2026-10-20T11:17:31.880Z",
+      "sourceFingerprint": "5082176012307475c028b4955d7aeff8643194e1ff5106c5ef86e0e859ebf30f",
       "status": "PASS"
     },
     "a11y": {
-      "checkedAt": "2026-10-20T09:38:57.158Z",
-      "sourceFingerprint": "185e3cbc84d16df3a17198f334ad149628eeb4b14d0338642684280590443c83",
+      "checkedAt": "2026-10-20T11:17:56.752Z",
+      "sourceFingerprint": "5082176012307475c028b4955d7aeff8643194e1ff5106c5ef86e0e859ebf30f",
       "status": "PASS"
     },
     "visual": {
-      "checkedAt": "2026-10-20T09:39:10.035Z",
-      "sourceFingerprint": "185e3cbc84d16df3a17198f334ad149628eeb4b14d0338642684280590443c83",
+      "checkedAt": "2026-10-20T11:18:14.389Z",
+      "sourceFingerprint": "5082176012307475c028b4955d7aeff8643194e1ff5106c5ef86e0e859ebf30f",
       "status": "PASS"
     },
     "motion": {
-      "checkedAt": "2026-10-20T09:39:37.710Z",
-      "sourceFingerprint": "185e3cbc84d16df3a17198f334ad149628eeb4b14d0338642684280590443c83",
+      "checkedAt": "2026-10-20T11:19:49.856Z",
+      "sourceFingerprint": "d77a6847cb5621d8ef858dda25d4683c50baabba5bde2c9b179f0673905dac1e",
       "status": "PASS"
     },
     "performance": {
-      "checkedAt": "2026-10-20T09:42:02.976Z",
-      "sourceFingerprint": "185e3cbc84d16df3a17198f334ad149628eeb4b14d0338642684280590443c83",
+      "checkedAt": "2026-10-20T11:12:05.037Z",
+      "sourceFingerprint": "5082176012307475c028b4955d7aeff8643194e1ff5106c5ef86e0e859ebf30f",
       "status": "PASS"
     }
   },
   "tests": {
     "nameUnit": 3,
-    "typescriptUnit": 21,
+    "typescriptUnit": 29,
     "embeddedSqlSuites": 3,
-    "browserJourneys": 90,
+    "browserJourneys": 111,
     "axeFindings": 0,
     "responsiveCaptures": 27,
-    "exportedRecordedBlooms": 2
+    "exportedRecordedBlooms": 2,
+    "trafficUnit": 8,
+    "actualRedis": "PASS: isolated Redis7.4 CI run39410652598",
+    "enabledCounterExport": "PASS: isolated local collector, actual Pages export"
   },
   "performance": {
     "lcpMs": {
-      "median": 1924,
-      "min": 1920,
-      "max": 1984
+      "median": 2380,
+      "min": 2316,
+      "max": 2444
     },
     "cls": {
-      "median": 0.010205645475861965,
-      "min": 0.010205645475861965,
-      "max": 0.010205645475861965
+      "median": 0.010517959828092173,
+      "min": 0.010517959828092173,
+      "max": 0.010517959828092173
     },
     "observedTransferBytes": {
-      "median": 745899,
-      "min": 745899,
-      "max": 745899
+      "median": 840427,
+      "min": 840427,
+      "max": 840427
     },
     "clickToFieldMs": {
-      "median": 1107.9265999999916,
-      "min": 995.815499999997,
-      "max": 1136.8171999999977
+      "median": 1106.9828999999881,
+      "min": 1101.1244000000006,
+      "max": 1175.3239999999932
     },
     "longestTaskMs": {
-      "median": 208,
-      "min": 125,
-      "max": 297
+      "median": 341,
+      "min": 182,
+      "max": 940
     }
   },
   "performanceCaveat": "Desktop headless Chrome lab results, not field p75, real-phone FPS or real-user INP. LCP is bounded by the observation window; transferred bytes include all completed requests in that window.",
@@ -94,14 +97,14 @@
     "missingFootageAcceptedAsLimitation": true
   },
   "review": {
-    "correctness": "Local gates pass",
-    "security": "No new external AI call, secret or analytics field; names render as text",
-    "accessibility": "Keyboard/reduced motion/error recovery and automated axe pass",
-    "mobile": "320,375,491 portrait and667x375 landscape guide bounds and overlap tests pass",
-    "performance": "Three matching cold loads pass existing2500ms LCP and0.1 CLS thresholds"
+    "correctness": "111 browser journeys and traffic tests pass",
+    "security": "Server-only Redis credentials/HMAC; strict body/path/CORS validation, bounded atomic counters, no personal fields",
+    "accessibility": "Zero axe findings, keyboard/reduced-motion and safe failure behavior",
+    "mobile": "Full actor fixed bottom right; small top-left counter across320–897px and landscape",
+    "performance": "All3 cold loads pass2500ms LCP/.1 CLS after earlier font discovery"
   },
   "notRun": [
-    "Connected Supabase/Groq deployment",
+    "Live Vercel/Upstash ingestion and persistence across frontend deployments: project/database not connected",
     "Live YouTube audio",
     "Physical phones and software keyboards",
     "Lint: repository has no configuration"
@@ -113,7 +116,9 @@
     "Native WebKit media response visibility requires documented API MIME/status fallback while actual playback remains asserted",
     "Native hooks remain pending normal trust review"
   ],
-  "deployment": "No production deployment or database mutation. GitHub Pages workflow runs only on main; this branch push does not publish.",
+  "deployment": "Frontend approved for Pages publication with counter disabled/unavailable. Backend activation requires approved resources and server credentials; no production events generated.",
   "evidence": "artifacts/quality/final (local and ignored)",
-  "priorRun": "Initial final run had86/90 passing; WebKit media harness fixed and gift timeout passed isolated; new exact-source full run90/90 passed with unchanged timeouts and retries."
+  "priorRun": "One local WebKit run had108/111 due hydration/animation timing; unchanged-source rerun111/111. Earlier performance max2744ms failed; font discovery fixed and all3 final loads2316–2444ms pass. Motion pause check corrected to await asynchronous pause commit.",
+  "frontendReadyForDeployment": true,
+  "evidenceScope": "Fast/journeys/a11y/visual/performance receipts retain their measured5082176 fingerprint. The only subsequent source delta is a test-harness wait for Animation.ready before pause-time sampling; build and motion rerun against final source. No passing receipt has been relabelled."
 }

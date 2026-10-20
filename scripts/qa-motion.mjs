@@ -90,6 +90,11 @@ try {
   if (!running.animations.some(({ duration }) => duration === 7000)) throw new Error("Photo motion does not expose the required 7000ms Web Animation");
 
   await page.getByRole("button", { name: "Tạm dừng hoa nở" }).click();
+  // pause() commits asynchronously at the next animation frame. Wait for its
+  // ready promise before comparing a stable time across the pause interval.
+  await page.locator('.photo-motion').evaluate(async element => {
+    await Promise.all(element.getAnimations().map(animation => animation.ready));
+  });
   const pausedBefore = await photoMetrics("paused-before-wait");
   await page.waitForTimeout(500);
   const pausedAfter = await photoMetrics("paused-after-wait");
