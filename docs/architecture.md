@@ -12,4 +12,4 @@ GitHub Pages publishes this service-free slice with a build-only `GITHUB_PAGES=t
 
 The floral geometry, SVG illustration, and CSS are original project code. The fuchsia rose cutout is an AI-generated project asset based on the user-provided visual reference; it is displayed after the 3D reveal and in the still greeting. Google Fonts serves DM Sans and Playfair Display, both licensed under the SIL Open Font License. No audio or stock photos are used.
 
-The AI writer brief remains in the source request for Slice 2; Slice 1 makes no provider call.
+The AI writer instruction is preserved in [ai-greeting-writer.md](ai-greeting-writer.md) for Slice 2; Slice 1 makes no provider call.
