@@ -1,5 +1,17 @@
 # NỞ quality review
 
+## Current traffic and actor release
+
+The current implementation supersedes the earlier compact mobile dock: the full actor stays fixed at the bottom right, with no question badge, finite silent welcome dance and dismissible contextual guidance. Responsive checks cover 320–897px and short landscape. The small traffic summary is under the top-left brand.
+
+The selected counter backend is a separate Vercel function with Upstash Redis. The latest owner brief specifies UTC daily reporting. Optional consent/GPC, random browser identity, retry-stable event IDs, allowlisted paths, HMAC storage and atomic Lua updates are implemented. No role picker is present. Historical Supabase collectors are not provisioned or used by the new counter.
+
+Actual Redis7.4 tests passed in [Traffic Redis QA](https://github.com/DUYTRUYENTHONG/no-bloom/actions/runs/39410652598) at commit669d89f: concurrent duplicate/unique requests, browser membership, UTC midnight, country page views, retention, capacity, corrupt-state handling and store recreation. The first CI attempt exposed CommonJS top-level-await incompatibility; both command entry points were corrected before the passing run.
+
+The enabled-counter Pages export also passed isolated browser tests for consent/GPC, lost-response retries, reload/navigation/hash behavior, separate browsers, unavailable storage, withdrawal, payload privacy, 320px layout/axe and gift failure isolation. Its collector is a local test stub, never production. A real browser timer binding issue found there was fixed.
+
+Production counter activation remains pending Vercel/Upstash provisioning and credentials. The unconfigured public summary reports unavailable; it never substitutes fake counts. Publishing the frontend does not deploy or reset Redis. Live backend persistence and ingestion remain unverified until that connection exists. Exact final local results are recorded in summary.json; historical entries below retain their original scope.
+
 Baseline: `3f6c096`, branch `codex/visitor-analytics`, clean before review. Next.js 16.4.2, React 19.2, npm + package-lock, Three 0.186/R3F 9.8, TypeScript 5.9, Playwright 1.64, embedded PGlite SQL tests. Windows / installed Chrome; WebKit is available and will be tried. Static Pages export uses `/no-bloom/`; Supabase collectors and optional Groq guide are separate undeployed functions. No production traffic or mutations are permitted.
 
 ## Inventory
