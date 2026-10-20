@@ -3,9 +3,22 @@ import "./globals.css";
 import {TrafficObserver} from "@/components/TrafficObserver";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://duytruyenthong.github.io/no-bloom/"),
   title: "No-bloom happy vietnamese woman days | NỞ",
   description: "Một lời chúc nhỏ, một đóa hoa dành riêng cho bạn nhân ngày Phụ nữ Việt Nam.",
   referrer: "no-referrer",
+  openGraph: {
+    type: "website", locale: "vi_VN", siteName: "NỞ",
+    url: "https://duytruyenthong.github.io/no-bloom/",
+    title: "NỞ — Một đóa hoa dành riêng cho bạn",
+    description: "Mở món quà, ngắm hoa nở và nhận một lời chúc dịu dàng nhân ngày 20/10.",
+    images: [{ url: "https://duytruyenthong.github.io/no-bloom/share-card.png", width: 1200, height: 630, alt: "NỞ — Một đóa hoa, một lời chúc dành riêng cho bạn." }],
+  },
+  twitter: {
+    card: "summary_large_image", title: "NỞ — Một đóa hoa dành riêng cho bạn",
+    description: "Một lời chúc nhỏ, một đóa hoa dành riêng cho bạn nhân ngày 20/10.",
+    images: ["https://duytruyenthong.github.io/no-bloom/share-card.png"],
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

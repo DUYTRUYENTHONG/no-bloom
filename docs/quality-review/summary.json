@@ -1,18 +1,18 @@
 {
-  "checkedAt": "2026-10-20T11:24:06.982Z",
-  "sourceFingerprint": "eb6f58d55dd9e9e94ecee1c55ee34b1dabf8f5ae753161da17eaf9c62f21a61a",
+  "checkedAt": "2026-10-20T11:33:20.650Z",
+  "sourceFingerprint": "bd7f004fe2c7855202ae96dc6cb6741b2184d283546d734a12badc53bfef93e8",
   "overall": "PASS",
   "scope": "Visitor counter implementation and static frontend release; Vercel/Upstash provisioning pending.",
   "readyForProduction": false,
   "gates": {
     "fast": {
-      "checkedAt": "2026-10-20T11:22:23.346Z",
-      "sourceFingerprint": "eb6f58d55dd9e9e94ecee1c55ee34b1dabf8f5ae753161da17eaf9c62f21a61a",
+      "checkedAt": "2026-10-20T11:31:48.392Z",
+      "sourceFingerprint": "bd7f004fe2c7855202ae96dc6cb6741b2184d283546d734a12badc53bfef93e8",
       "status": "PASS"
     },
     "build": {
-      "checkedAt": "2026-10-20T11:22:54.559Z",
-      "sourceFingerprint": "eb6f58d55dd9e9e94ecee1c55ee34b1dabf8f5ae753161da17eaf9c62f21a61a",
+      "checkedAt": "2026-10-20T11:32:19.972Z",
+      "sourceFingerprint": "bd7f004fe2c7855202ae96dc6cb6741b2184d283546d734a12badc53bfef93e8",
       "status": "PASS"
     },
     "journeys": {
@@ -21,8 +21,8 @@
       "status": "PASS"
     },
     "a11y": {
-      "checkedAt": "2026-10-20T11:23:49.973Z",
-      "sourceFingerprint": "eb6f58d55dd9e9e94ecee1c55ee34b1dabf8f5ae753161da17eaf9c62f21a61a",
+      "checkedAt": "2026-10-20T11:32:58.094Z",
+      "sourceFingerprint": "bd7f004fe2c7855202ae96dc6cb6741b2184d283546d734a12badc53bfef93e8",
       "status": "PASS"
     },
     "visual": {
@@ -52,7 +52,9 @@
     "trafficUnit": 8,
     "actualRedis": "PASS: isolated Redis7.4 CI run39410652598",
     "enabledCounterExport": "PASS: isolated local collector, actual Pages export",
-    "introductionRemovalBrowserChecks": 24
+    "introductionRemovalBrowserChecks": 24,
+    "socialGuideChecks": 20,
+    "socialCrawlerExport": "PASS: static OG/Twitter tags, absolute Pages image URL,1200x630 PNG"
   },
   "performance": {
     "lcpMs": {
@@ -117,9 +119,9 @@
     "Native WebKit media response visibility requires documented API MIME/status fallback while actual playback remains asserted",
     "Native hooks remain pending normal trust review"
   ],
-  "deployment": "Owner authorized production publication. Pages CI pending; traffic backend still unconnected and disabled.",
+  "deployment": "Production release requested; new Pages CI required after sharing metadata and guide loading fix. Traffic remains disabled/unconnected.",
   "evidence": "artifacts/quality/final (local and ignored)",
   "priorRun": "One local WebKit run had108/111 due hydration/animation timing; unchanged-source rerun111/111. Earlier performance max2744ms failed; font discovery fixed and all3 final loads2316–2444ms pass. Motion pause check corrected to await asynchronous pause commit.",
   "frontendReadyForDeployment": true,
-  "evidenceScope": "Fast/journeys/a11y/visual/performance receipts retain their measured5082176 fingerprint. The only subsequent source delta is a test-harness wait for Animation.ready before pause-time sampling; build and motion rerun against final source. No passing receipt has been relabelled. Final owner correction removes the introduction note/skip control; Escape dismisses and focuses the dock. Fast/build/a11y and24 Chromium/WebKit introduction/guide cases pass on this delta. Earlier complete111 journeys,visual,motion and performance receipts retain their measured fingerprints; production CI reruns full journeys."
+  "evidenceScope": "Fast/journeys/a11y/visual/performance receipts retain their measured5082176 fingerprint. The only subsequent source delta is a test-harness wait for Animation.ready before pause-time sampling; build and motion rerun against final source. No passing receipt has been relabelled. Final owner correction removes the introduction note/skip control; Escape dismisses and focuses the dock. Fast/build/a11y and24 Chromium/WebKit introduction/guide cases pass on this delta. Earlier complete111 journeys,visual,motion and performance receipts retain their measured fingerprints; production CI reruns full journeys. Sharing-card follow-up adds static OG/Twitter metadata/image and removes the optional guide module loading boundary after CI110/111 exposed a missing dance control.20 targeted Chromium/WebKit guide tests, fast,build,a11y and crawler HTML checks pass. Final CI must pass before publication."
 }

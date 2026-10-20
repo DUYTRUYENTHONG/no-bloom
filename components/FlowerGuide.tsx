@@ -2,9 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Locale } from "@/lib/content";
-import dynamic from "next/dynamic";
 import { ActorIntroduction } from "./ActorIntroduction";
-const DanceMoment = dynamic(() => import("./DanceMoment").then((module) => module.DanceMoment), { ssr: false });
+import { DanceMoment } from "./DanceMoment";
 
 type Stage = "invitation" | "personalization" | "blooming" | "greeting" | "withering";
 type Message = { role: "user" | "assistant"; text: string };
