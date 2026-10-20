@@ -7,6 +7,7 @@ import { bloomConfig, type BloomQuality } from "@/lib/bloom.config";
 import { flowerCatalog, type FlowerKind } from "@/lib/flower-catalog";
 import { petalProgress, smooth } from "@/lib/bloom-pose";
 import { createLeafGeometry, createPetalGeometry, type PetalShape } from "./PetalGeometry";
+import { useOwnedResource } from "./useOwnedResource";
 
 type OtherFlower = Exclude<FlowerKind, "rose" | "peach-rose">;
 type Props = { kind: OtherFlower; primary: boolean; progress: RefObject<number>; quality: BloomQuality; wireframe?: boolean; visible?: boolean };
@@ -44,21 +45,21 @@ export function BlossomRig({ kind, primary, progress, quality, wireframe = false
   const centerMaterial = useMemo(() => new MeshStandardMaterial({ color: palette.center, roughness: 0.82 }), [palette]);
   const leafGeometry = useMemo(() => createLeafGeometry(...form.leaf, quality), [form, quality]);
   const sepalGeometry = useMemo(() => createLeafGeometry(kind === "orchid" ? 0.35 : 0.52, kind === "lily" ? 0.11 : 0.17, quality), [kind, quality]);
-  const stemGeometry = useMemo(() => new TubeGeometry(new CatmullRomCurve3([
+  const stemCurve = useMemo(() => new CatmullRomCurve3([
     new Vector3(0, -0.02, 0), new Vector3(-0.05, -0.65, 0),
     new Vector3(primary ? -0.16 : 0.12, -1.35, 0.02),
     new Vector3(primary ? -0.24 : 0.24, -2.7, 0.04),
-  ]), 22, kind === "cherry" ? 0.043 : 0.027, 7, false), [kind, primary]);
+  ]), [primary]);
+  const stemGeometry = useMemo(() => new TubeGeometry(stemCurve, 22, kind === "cherry" ? 0.043 : 0.027, 7, false), [kind, stemCurve]);
+  const leafRoots = useMemo(() => [0.32, 0.51, 0.73].map((t) => stemCurve.getPoint(t)), [stemCurve]);
   const refs = useRef<Ref[]>([]);
   const sepalRefs = useRef<(Group | null)[]>([]);
   const centerRef = useRef<Group>(null);
   const headRef = useRef<Group>(null);
 
-  useEffect(() => () => {
-    petals.forEach((petal) => petal.geometry.dispose());
-    petalMaterial.dispose(); leafMaterial.dispose(); stemMaterial.dispose(); centerMaterial.dispose();
-    leafGeometry.dispose(); sepalGeometry.dispose(); stemGeometry.dispose();
-  }, [petals, petalMaterial, leafMaterial, stemMaterial, centerMaterial, leafGeometry, sepalGeometry, stemGeometry]);
+  useEffect(() => () => petals.forEach((petal) => petal.geometry.dispose()), [petals]);
+  useOwnedResource(petalMaterial); useOwnedResource(leafMaterial); useOwnedResource(stemMaterial); useOwnedResource(centerMaterial);
+  useOwnedResource(leafGeometry); useOwnedResource(sepalGeometry); useOwnedResource(stemGeometry);
 
   useFrame(() => {
     const master = progress.current;
@@ -67,7 +68,7 @@ export function BlossomRig({ kind, primary, progress, quality, wireframe = false
       const record = refs.current[n];
       if (!record?.pivot || !record.mesh) continue;
       const local = petalProgress(master, petal.layer, petal.index, seed, !primary);
-      record.pivot.rotation.x = -local * form.angles[petal.layer];
+      record.pivot.rotation.x = local * form.angles[petal.layer];
       const morph = record.mesh.morphTargetInfluences;
       if (kind === "orchid" && petal.layer === 1) record.mesh.scale.setScalar(0.04 + 0.96 * local);
       if (morph) {
@@ -76,7 +77,7 @@ export function BlossomRig({ kind, primary, progress, quality, wireframe = false
       }
     }
     const relax = smooth(master * 5);
-    sepalRefs.current.forEach((sepal) => { if (sepal) sepal.rotation.x = -0.17 - relax * 0.34; });
+    sepalRefs.current.forEach((sepal) => { if (sepal) sepal.rotation.x = 0.17 + relax * 1.25; });
     if (centerRef.current) centerRef.current.scale.setScalar(0.25 + 0.75 * smooth((master - (primary ? 0.43 : 0.52)) * 3));
     if (headRef.current) headRef.current.rotation.x = 0.62 * smooth((master - (primary ? 0.18 : 0.26)) * 1.5);
   });
@@ -84,7 +85,7 @@ export function BlossomRig({ kind, primary, progress, quality, wireframe = false
   const scale = primary ? 1.13 : 0.85;
   return <group visible={visible} position={primary ? [0.6, 0.9, -0.05] : [-0.76, -0.22, 0.32]} scale={scale} rotation={[0.12, primary ? -0.2 : 0.24, primary ? -0.07 : 0.1]}>
     <mesh geometry={stemGeometry} material={stemMaterial} />
-    {[-0.8, -1.35, -1.86].map((y, index) => <group key={index} position={[primary ? -0.07 - index * 0.06 : 0.05 + index * 0.06, y, 0.03]} rotation={[0.1, 0, index % 2 ? -1.05 : 1.05]}><mesh geometry={leafGeometry} material={leafMaterial} /></group>)}
+    {leafRoots.map((position, index) => <group key={index} position={position} rotation={[0.1, 0, index % 2 ? -1.05 : 1.05]}><mesh geometry={leafGeometry} material={leafMaterial} /></group>)}
     <group ref={headRef}>
     <mesh position={[0, -0.01, 0]} scale={[0.11, 0.16, 0.11]}><sphereGeometry args={[1, 10, 8]} /><meshStandardMaterial color="#31501f" roughness={0.9} /></mesh>
     {Array.from({ length: kind === "lily" ? 3 : 5 }, (_, index) => <group key={`sepal-${index}`} rotation={[0, index * Math.PI * 2 / (kind === "lily" ? 3 : 5), 0]}><group ref={(node) => { sepalRefs.current[index] = node; }}><mesh geometry={sepalGeometry} material={leafMaterial} /></group></group>)}
@@ -93,7 +94,7 @@ export function BlossomRig({ kind, primary, progress, quality, wireframe = false
       const around = lip ? (petal.index ? 0.19 : -0.19) : (petal.index + (petal.layer % 2) * 0.37) / petal.count * Math.PI * 2 + petal.random * 0.04;
       const radial = kind === "peony" ? [0.12, 0.09, 0.06, 0.035][petal.layer] : kind === "orchid" ? [0.07, 0.38][petal.layer] : 0.055;
       const lower = kind === "peony" ? [0, 0.1, 0.2, 0.3][petal.layer] : lip ? 0.08 : petal.layer * 0.14;
-      return <group key={`${petal.layer}-${petal.index}`} rotation={[0, around, lip ? Math.PI + (petal.index ? 0.32 : -0.32) : 0]} position={[0, lower, radial]}><group ref={(node) => { refs.current[n] = { pivot: node, mesh: refs.current[n]?.mesh ?? null }; }}><mesh ref={(node) => { if (node) node.updateMorphTargets(); refs.current[n] = { pivot: refs.current[n]?.pivot ?? null, mesh: node }; }} geometry={petal.geometry} material={petalMaterial} frustumCulled={false} /></group></group>;
+      return <group key={`${petal.layer}-${petal.index}`} rotation={[0, around, 0]}><group position={[0, lower, radial]} rotation={[0, 0, lip ? Math.PI + (petal.index ? 0.32 : -0.32) : 0]}><group ref={(node) => { refs.current[n] = { pivot: node, mesh: refs.current[n]?.mesh ?? null }; }}><mesh ref={(node) => { if (node) node.updateMorphTargets(); refs.current[n] = { pivot: refs.current[n]?.pivot ?? null, mesh: node }; }} geometry={petal.geometry} material={petalMaterial} frustumCulled={false} /></group></group></group>;
     })}
     {form.center && <group ref={centerRef} position={[0, kind === "peony" ? 0.35 : 0.15, 0]}>
       {Array.from({ length: kind === "lily" || kind === "alstroemeria" ? 6 : kind === "orchid" ? 3 : 10 }, (_, index) => <group key={index} rotation={[0, index * Math.PI * 2 / (kind === "lily" || kind === "alstroemeria" ? 6 : kind === "orchid" ? 3 : 10), 0]}>

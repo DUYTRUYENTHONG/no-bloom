@@ -7,6 +7,7 @@ import { BloomTimeline } from "@/lib/BloomTimeline";
 import { bloomConfig, type BloomQuality } from "@/lib/bloom.config";
 import { RoseRig } from "./RoseRig";
 import { BlossomRig } from "./BlossomRig";
+import { smooth } from "@/lib/bloom-pose";
 import type { FlowerKind } from "@/lib/flower-catalog";
 
 export type DebugCommand = { kind: "seek" | "play" | "pause" | "replay" | "skip"; value?: number; nonce: number };
@@ -14,21 +15,25 @@ type Stage = "invitation" | "personalization" | "blooming" | "greeting" | "withe
 type Props = {
   kind: FlowerKind;
   staticPose: boolean;
+  paused: boolean;
   stage: Stage; quality: BloomQuality; wireframe: boolean; showPrimary: boolean; showSecondary: boolean;
-  debugCommand?: DebugCommand; onReady: () => void; onComplete: () => void; onFailure: () => void;
+  debugCommand?: DebugCommand; onReady: () => void; onComplete: () => void; onClosed: () => void; onFailure: () => void;
   onDebugProgress?: (value: number) => void;
 };
 
-function BloomController({ stage, staticPose, onComplete, debugCommand, onDebugProgress, progress }: Pick<Props, "stage" | "staticPose" | "onComplete" | "debugCommand" | "onDebugProgress"> & { progress: RefObject<number> }) {
+function BloomController({ stage, staticPose, paused, onComplete, onClosed, debugCommand, onDebugProgress, progress }: Pick<Props, "stage" | "staticPose" | "paused" | "onComplete" | "onClosed" | "debugCommand" | "onDebugProgress"> & { progress: RefObject<number> }) {
   const { invalidate } = useThree();
   const completeRef = useRef(onComplete);
   completeRef.current = onComplete;
+  const closedRef = useRef(onClosed);
+  closedRef.current = onClosed;
   const stageRef = useRef(stage);
   stageRef.current = stage;
   const timeline = useRef<BloomTimeline | null>(null);
   if (!timeline.current) timeline.current = new BloomTimeline(() => { if (stageRef.current === "blooming") completeRef.current(); });
   const lastTime = useRef<number | null>(null);
   const hidden = useRef(false);
+  const closing = useRef({ start: 1, elapsed: 0, notified: false });
 
   useEffect(() => {
     const visibility = () => { hidden.current = document.hidden; lastTime.current = null; if (!hidden.current) invalidate(); };
@@ -41,11 +46,19 @@ function BloomController({ stage, staticPose, onComplete, debugCommand, onDebugP
     if (staticPose) timeline.current!.seek(1);
     else if (stage === "blooming") timeline.current!.replay();
     else if (stage === "greeting") timeline.current!.seek(1);
+    else if (stage === "withering") { timeline.current!.pause(); closing.current = { start: progress.current, elapsed: 0, notified: false }; }
     else timeline.current!.seek(0);
-    progress.current = timeline.current!.progress;
+    if (stage !== "withering") progress.current = timeline.current!.progress;
     lastTime.current = null;
     invalidate();
   }, [stage, staticPose, progress, invalidate]);
+
+  useEffect(() => {
+    if (stage !== "blooming") return;
+    if (paused) timeline.current!.pause(); else timeline.current!.play();
+    lastTime.current = null;
+    invalidate();
+  }, [paused, stage, invalidate]);
 
   useEffect(() => {
     if (!debugCommand) return;
@@ -66,6 +79,14 @@ function BloomController({ stage, staticPose, onComplete, debugCommand, onDebugP
     const delta = lastTime.current === null ? 0 : now - lastTime.current;
     lastTime.current = now;
     const t = timeline.current!;
+    if (stageRef.current === "withering") {
+      closing.current.elapsed += delta;
+      progress.current = closing.current.start * (1 - smooth(closing.current.elapsed / 450));
+      onDebugProgress?.(progress.current);
+      if (closing.current.elapsed < 450) invalidate();
+      else if (!closing.current.notified) { closing.current.notified = true; closedRef.current(); }
+      return;
+    }
     if (t.playing) {
       progress.current = t.tick(delta);
       onDebugProgress?.(progress.current);
@@ -85,7 +106,7 @@ function Scene(props: Props) {
     <hemisphereLight args={["#fff0df", "#24430e", 0.9]} />
     <directionalLight position={[-3, 5, 7]} intensity={2.45} color="#fff1e8" />
     <directionalLight position={[3, 2, -4]} intensity={0.7} color="#f391bc" />
-    <BloomController stage={props.stage} staticPose={props.staticPose} onComplete={props.onComplete} progress={progress} debugCommand={props.debugCommand} onDebugProgress={props.onDebugProgress} />
+    <BloomController stage={props.stage} staticPose={props.staticPose} paused={props.paused} onComplete={props.onComplete} onClosed={props.onClosed} progress={progress} debugCommand={props.debugCommand} onDebugProgress={props.onDebugProgress} />
     {props.kind === "rose" || props.kind === "peach-rose" ? <>
       <RoseRig kind={props.kind} primary progress={progress} quality={props.quality} wireframe={props.wireframe} visible={props.showPrimary} />
       <RoseRig kind={props.kind} primary={false} progress={progress} quality={props.quality} wireframe={props.wireframe} visible={props.showSecondary} />
@@ -97,6 +118,8 @@ function Scene(props: Props) {
 }
 
 export function RoseCanvas(props: Props) {
+  const cleanup = useRef<(() => void) | null>(null);
+  useEffect(() => () => cleanup.current?.(), []);
   return <Canvas
     className="rose-canvas"
     frameloop="demand"
@@ -108,9 +131,15 @@ export function RoseCanvas(props: Props) {
       gl.toneMappingExposure = 1.05;
       camera.lookAt(0, 0.05, 0);
       if (process.env.NODE_ENV === "development") {
-        (window as typeof window & { __noBloomStats?: () => { calls: number; triangles: number } }).__noBloomStats = () => ({
-          calls: gl.info.render.calls, triangles: gl.info.render.triangles,
+        const target = window as typeof window & { __noBloomStats?: () => { calls: number; triangles: number; frame: number; geometries: number; textures: number } };
+        const stats = () => ({
+          calls: gl.info.render.calls, triangles: gl.info.render.triangles, frame: gl.info.render.frame,
+          geometries: gl.info.memory.geometries, textures: gl.info.memory.textures,
         });
+        target.__noBloomStats = stats;
+        cleanup.current = () => { if (target.__noBloomStats === stats) delete target.__noBloomStats; gl.domElement.removeEventListener("webglcontextlost", props.onFailure); };
+      } else {
+        cleanup.current = () => gl.domElement.removeEventListener("webglcontextlost", props.onFailure);
       }
       gl.domElement.addEventListener("webglcontextlost", props.onFailure, { once: true });
       props.onReady();

@@ -11,8 +11,8 @@ export const bloomConfig = {
     lime: "#B5D34B",
   },
   quality: {
-    high: { rows: 12, columns: 10, dpr: 1.75 },
-    balanced: { rows: 8, columns: 7, dpr: 1.35 },
+    high: { rows: 16, columns: 14, dpr: 1.75 },
+    balanced: { rows: 12, columns: 10, dpr: 1.35 },
   },
 } as const;
 

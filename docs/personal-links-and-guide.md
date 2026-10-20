@@ -21,3 +21,7 @@ The public endpoint has strict origins, a 2 KB body cap, a narrow request schema
 5. Use a staging Groq key first and confirm a test question, 429 behavior, and that browser source contains no key. Keep `GROQ_API_KEY` exclusively in Supabase secrets; never use a `NEXT_PUBLIC_` prefix for it.
 
 No cloud function, database migration, or Pages deployment has been applied by this implementation.
+
+## Optional dance and music
+
+The guide offers a seven-second silent dance and a separate opt-in official YouTube player for Cyndi Lauper’s Girls Just Want to Have Fun. Native player play/pause controls the dance; closing the guide stops playback. No audio is bundled or autoplayed. A prepared Vietnamese/English compliment works without Groq. Four original rendered dance poses are sprite animation, not a skeletal 3D rig. Reduced motion keeps the actor still while preserving the compliment and controls.

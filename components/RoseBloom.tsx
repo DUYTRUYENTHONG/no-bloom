@@ -6,10 +6,11 @@ import type { BloomQuality } from "@/lib/bloom.config";
 import type { FlowerKind } from "@/lib/flower-catalog";
 import type { DebugCommand } from "./rose/RoseCanvas";
 import { StaticFlowerFallback } from "./rose/StaticFlowerFallback";
+import type { Locale } from "@/lib/content";
 
 const RoseCanvas = dynamic(() => import("./rose/RoseCanvas").then((module) => module.RoseCanvas), { ssr: false });
 type Stage = "invitation" | "personalization" | "blooming" | "greeting" | "withering";
-type Props = { stage: Stage; kind: FlowerKind; motionEnabled: boolean; onComplete: () => void };
+type Props = { stage: Stage; kind: FlowerKind; locale: Locale; paused: boolean; motionEnabled: boolean; onComplete: () => void; onClosed: () => void; onUnavailable: () => void };
 
 class SceneBoundary extends Component<{ children: ReactNode; onFailure: () => void }, { failed: boolean }> {
   state = { failed: false };
@@ -18,7 +19,7 @@ class SceneBoundary extends Component<{ children: ReactNode; onFailure: () => vo
   render() { return this.state.failed ? null : this.props.children; }
 }
 
-export function RoseBloom({ stage, kind, motionEnabled, onComplete }: Props) {
+export function RoseBloom({ stage, kind, locale, paused, motionEnabled, onComplete, onClosed, onUnavailable }: Props) {
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
   const [supported, setSupported] = useState(false);
@@ -31,10 +32,18 @@ export function RoseBloom({ stage, kind, motionEnabled, onComplete }: Props) {
   const [debugCommand, setDebugCommand] = useState<DebugCommand>();
   const [debugProgress, setDebugProgress] = useState(0);
   useEffect(() => {
-    setSupported(Boolean(document.createElement("canvas").getContext("webgl2")));
-    setChecked(true);
     if (process.env.NODE_ENV === "development") setDebug(new URLSearchParams(window.location.search).has("bloomDebug"));
   }, []);
+  const active = motionEnabled && (stage !== "invitation" || debug);
+  useEffect(() => {
+    if (!active) { setSupported(false); setChecked(false); setReady(false); return; }
+    const context = document.createElement("canvas").getContext("webgl2");
+    setSupported(Boolean(context));
+    context?.getExtension("WEBGL_lose_context")?.loseContext();
+    if (!context) onUnavailable();
+    setChecked(true);
+  }, [active, onUnavailable]);
+  useEffect(() => { if (failed) onUnavailable(); }, [failed, onUnavailable]);
   useEffect(() => { if (stage === "blooming" && (!motionEnabled || (checked && (!supported || failed)))) onComplete(); }, [motionEnabled, stage, onComplete, checked, supported, failed]);
   useEffect(() => {
     if (!motionEnabled || !supported || ready || failed || stage !== "blooming") return;
@@ -45,14 +54,15 @@ export function RoseBloom({ stage, kind, motionEnabled, onComplete }: Props) {
     setDebugCommand((prior) => ({ kind, value, nonce: (prior?.nonce ?? 0) + 1 }));
     if (value !== undefined) setDebugProgress(value);
   }
-  const staticVisible = !supported || !ready || failed;
+  const staticVisible = !active || !supported || !ready || failed;
   const finalPose = stage === "greeting" || !motionEnabled || failed || (checked && !supported);
+  useEffect(() => { if (stage === "withering" && staticVisible) onClosed(); }, [stage, staticVisible, onClosed]);
   return <div className="rose-bloom" data-rose-renderer={staticVisible ? "static" : "webgl"}>
     {staticVisible && <StaticFlowerFallback kind={kind} open={finalPose} />}
-    {kind === "rose" && motionEnabled && supported && !failed && !debug && (stage === "invitation" || stage === "personalization" || stage === "blooming") && <div className={`rose-bud-reference ${stage === "blooming" ? "is-opening" : ""}`} aria-hidden="true"><img src="rose-bud-reference.png" alt="" /></div>}
-    {supported && !failed && <SceneBoundary onFailure={() => setFailed(true)}>
-      <RoseCanvas kind={kind} stage={stage} staticPose={!motionEnabled} quality={quality} wireframe={wireframe} showPrimary={showPrimary} showSecondary={showSecondary}
-        debugCommand={debugCommand} onReady={() => setReady(true)} onComplete={onComplete} onFailure={() => setFailed(true)}
+    {active && supported && !ready && !failed && <p className="rose-loading" role="status">{locale === "vi" ? "Đang chuẩn bị hoa 3D…" : "Preparing the 3D flowers…"}</p>}
+    {active && supported && !failed && <SceneBoundary onFailure={() => setFailed(true)}>
+      <RoseCanvas kind={kind} stage={stage} paused={paused} staticPose={false} quality={quality} wireframe={wireframe} showPrimary={showPrimary} showSecondary={showSecondary}
+        debugCommand={debugCommand} onReady={() => setReady(true)} onComplete={onComplete} onClosed={onClosed} onFailure={() => setFailed(true)}
         onDebugProgress={debug ? setDebugProgress : undefined} />
     </SceneBoundary>}
     {debug && <div className="rose-inspector">

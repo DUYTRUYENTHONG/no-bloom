@@ -19,14 +19,18 @@ export function Experience() {
   const [stage, setStage] = useState<Stage>("invitation");
   const [input, setInput] = useState("");
   const [name, setName] = useState<string | null>(null);
-  const [error, setError] = useState("");
+  const [nameIssue, setNameIssue] = useState<"required" | "long" | null>(null);
   const [staticMode, setStaticMode] = useState(false);
   const [flower, setFlower] = useState<FlowerKind>("rose");
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const [sceneUnavailable, setSceneUnavailable] = useState(false);
+  const markSceneUnavailable = useCallback(() => setSceneUnavailable(true), []);
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingAction = useRef<"replay" | "restart" | null>(null);
   const t = copy[locale];
+  const error = nameIssue === "required" ? t.nameError : nameIssue === "long" ? t.nameLong : "";
+  useEffect(() => { document.documentElement.lang = locale; }, [locale]);
   const botanicalState: BotanicalState = error ? "WITHER_RELOAD" : stage === "invitation" ? "BUD" : stage === "personalization" ? "SPROUT" : stage === "blooming" ? "BLOOMING" : stage === "withering" ? "WITHER_RELOAD" : "FULL_BLOOM";
   const payload = createBotanicalResponse(botanicalState, locale, name, flower);
 
@@ -55,37 +59,31 @@ export function Experience() {
   }, [stage]);
 
   const finish = useCallback(() => {
-    if (timer.current) clearTimeout(timer.current);
     window.scrollTo({ top: 0, behavior: "instant" });
     setStage("greeting");
   }, []);
 
-  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
-
   function startBloom(selectedName: string | null) {
-    if (timer.current) clearTimeout(timer.current);
     window.scrollTo({ top: 0, behavior: staticMode || reducedMotion ? "instant" : "smooth" });
     setName(selectedName);
-    setError("");
+    setNameIssue(null);
+    setPaused(false);
     setStage("blooming");
   }
 
   function submitName(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const result = validateName(input);
-    if (!result.valid) { setError(result.tooLong ? t.nameLong : t.nameError); return; }
+    if (!result.valid) { setNameIssue(result.tooLong ? "long" : "required"); return; }
     try { sessionStorage.setItem("no-bloom-name", result.value); } catch { /* storage unavailable */ }
     startBloom(result.value);
   }
 
   function replay() { beginWither("replay"); }
   function beginWither(action: "replay" | "restart") {
-    if (timer.current) clearTimeout(timer.current);
     window.scrollTo({ top: 0, behavior: staticMode || reducedMotion ? "instant" : "smooth" });
     pendingAction.current = action;
     setStage("withering");
-    if (staticMode || reducedMotion) timer.current = setTimeout(finishWither, 0);
-    else timer.current = setTimeout(finishWither, 450);
   }
   function finishWither() {
     const action = pendingAction.current;
@@ -94,7 +92,7 @@ export function Experience() {
     else if (action === "restart") clearName();
   }
   function clearName() {
-    setInput(""); setName(null); setError(""); setStage("personalization");
+    setInput(""); setName(null); setNameIssue(null); setStage("personalization");
     try { sessionStorage.removeItem("no-bloom-name"); } catch { /* storage unavailable */ }
     const url = new URL(window.location.href);
     if (url.searchParams.has("for")) { url.searchParams.delete("for"); url.searchParams.delete("flower"); window.history.replaceState(null, "", url); }
@@ -128,7 +126,7 @@ export function Experience() {
           <div className="flower-choice"><label htmlFor="flower-kind">{locale === "vi" ? "Chọn loài hoa của bạn" : "Choose your flower"}</label><select id="flower-kind" value={flower} onChange={(event) => setFlower(event.target.value as FlowerKind)}>{flowerKinds.map((kind) => <option key={kind} value={kind}>{flowerCatalog[kind][locale]}</option>)}</select></div>
           <form onSubmit={submitName} noValidate>
             <label htmlFor="preferred-name" className="input-label">{t.namePlaceholder}</label>
-            <input id="preferred-name" value={input} onChange={(event) => { setInput(event.target.value); setError(""); }} placeholder={t.namePlaceholder} autoComplete="nickname" aria-invalid={Boolean(error)} aria-describedby={error ? "name-error" : undefined} autoFocus />
+            <input id="preferred-name" value={input} onChange={(event) => { setInput(event.target.value); setNameIssue(null); }} placeholder={t.namePlaceholder} autoComplete="name" aria-invalid={Boolean(error)} aria-describedby={error ? "name-error" : undefined} autoFocus />
             {error && <p id="name-error" className="field-error" role="alert">{error}</p>}
             <button className="primary-button" type="submit">{t.bloom}<span aria-hidden="true">↗</span></button>
           </form>
@@ -139,6 +137,7 @@ export function Experience() {
           <h1>{t.preparing}</h1>
           <p className="visually-hidden">{payload.componentSpec.props.data.message}</p>
           <button className="text-button skip-button" onClick={finish}>{t.skip}<span aria-hidden="true">→</span></button>
+          {!showStatic && !sceneUnavailable && <button className="text-button pause-button" onClick={() => setPaused((value) => !value)}>{paused ? t.resume : t.pause}</button>}
         </div>}
         {stage === "greeting" && <FloralGreeting payload={payload} ref={headingRef} onReplay={replay} onRestart={() => beginWither("restart")} />}
         {stage === "withering" && <div className="story-content blooming-content" aria-hidden="true"><p className="overline">A FLOWER, JUST FOR YOU</p><h1>{t.preparing}</h1></div>}
@@ -148,10 +147,10 @@ export function Experience() {
       <section className="flower-panel" aria-label={locale === "vi" ? flowerCatalog[flower].descriptionVi : flowerCatalog[flower].descriptionEn}>
         <div className="flower-halo" aria-hidden="true" />
         <div className="flower-frame">
-          <RoseBloom stage={stage} kind={flower} motionEnabled={!showStatic} onComplete={finish} />
+          <RoseBloom stage={stage} kind={flower} locale={locale} paused={paused} motionEnabled={!showStatic} onComplete={finish} onClosed={finishWither} onUnavailable={markSceneUnavailable} />
         </div>
         <div className="flower-caption"><span className="caption-line" /><span>{String(flowerKinds.indexOf(flower) + 1).padStart(2, "0")} / {String(flowerKinds.length).padStart(2, "0")}</span><span className="caption-name">{flowerCatalog[flower].caption}</span></div>
-        <button className="mode-button" onClick={() => setStaticMode((value) => !value)} disabled={reducedMotion} aria-label={showStatic ? t.animated : t.static}>{showStatic ? t.animated : t.static}</button>
+        <button className="mode-button" onClick={() => setStaticMode((value) => !value)} disabled={reducedMotion || sceneUnavailable} aria-label={sceneUnavailable ? t.sceneUnavailable : showStatic ? t.animated : t.static}>{sceneUnavailable ? t.sceneUnavailable : showStatic ? t.animated : t.static}</button>
         {reducedMotion && <p className="mode-note">{t.reduced}</p>}
         <VisitorCounter locale={locale} />
       </section>

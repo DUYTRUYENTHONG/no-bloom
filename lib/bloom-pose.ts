@@ -18,7 +18,7 @@ export function petalProgress(master: number, layer: number, index: number, seed
 
 export function petalPose(master: number, layer: number, index: number, seed: number, secondary = false) {
   const progress = petalProgress(master, layer, index, seed, secondary);
-  const maxAngle = [1.02, 0.76, 0.48, 0.23][layer];
+  const maxAngle = [0.68, 0.48, 0.27, 0.1][layer];
   return {
     progress,
     // Two absolute morph poses: closed→intermediate→open.

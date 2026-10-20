@@ -22,17 +22,20 @@ function pose(shape: PetalShape, rows: number, columns: number, openness: number
     for (let column = 0; column <= columns; column++) {
       const u = column / columns * 2 - 1;
       const at = (row * (columns + 1) + column) * 3;
-      const body = shape.profile === "pointed"
+      const openBody = shape.profile === "pointed"
         ? Math.pow(Math.sin(Math.PI * t), 0.7)
         : Math.pow(Math.sin(Math.PI * t * 0.5), 0.82) * (1 - 0.13 * t);
+      const closedBody = Math.pow(Math.sin(Math.PI * t), 0.65);
+      const body = closedBody * (1 - openness) + openBody * openness;
       const root = 0.035 + body * 0.965;
       const width = shape.width * ((shape.closedWidth ?? 0.38) * (1 - openness) + openness) * root;
       const asymmetry = 1 + shape.variation * (u * 0.16 + t * 0.08);
       positions[at] = u * width * asymmetry;
-      positions[at + 1] = shape.length * ((shape.closedLength ?? 1) * (1 - openness) + openness) * t - 0.12 * Math.pow(Math.abs(u), 2.4) * Math.pow(t, 8)
+      positions[at + 1] = shape.length * ((shape.closedLength ?? 1) * (1 - openness) + openness) * t - shape.length * 0.32 * Math.pow(Math.abs(u), 2) * Math.pow(t, 6)
         + (t > 0.77 ? Math.sin((u + shape.variation) * Math.PI * 1.5) * (shape.profile === "ruffled" ? 0.075 : 0.014) * (t - 0.77) / 0.23 * openness : 0);
       positions[at + 2] = -Math.pow(Math.abs(u), 2) * (0.04 + 0.18 * openness) * body
         + shape.curl * openness * Math.pow(t, 3) * (0.2 + 0.8 * Math.abs(u))
+        + (1 - openness) * (0.26 * Math.sin(Math.PI * t) - 0.1 * t * t)
         + 0.045 * Math.sin(Math.PI * t) * (1 - Math.abs(u));
     }
   }
@@ -91,9 +94,14 @@ export function createPetalGeometry(shape: PetalShape, quality: BloomQuality, pa
 export function createLeafGeometry(length: number, width: number, quality: BloomQuality) {
   const shape: PetalShape = { length, width, curl: -0.12, variation: 0.5, closedWidth: 1, profile: "pointed" };
   const geometry = createPetalGeometry(shape, quality);
+  const openPose = geometry.morphAttributes.position?.[1];
+  if (!openPose) throw new Error("Leaf open pose was not created");
+  geometry.setAttribute("position", openPose.clone());
   // A leaf is a still surface: remove petal morphs and color attribute.
   delete geometry.morphAttributes.position;
   delete geometry.morphAttributes.normal;
   geometry.deleteAttribute("color");
+  geometry.computeVertexNormals();
+  geometry.computeBoundingSphere();
   return geometry;
 }

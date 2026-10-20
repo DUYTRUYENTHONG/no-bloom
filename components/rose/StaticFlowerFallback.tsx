@@ -1,7 +1,7 @@
 import { flowerCatalog, type FlowerKind } from "@/lib/flower-catalog";
 
 export function StaticFlowerFallback({ kind, open }: { kind: FlowerKind; open: boolean }) {
-  if (kind === "rose") return <div className="static-rose-fallback" aria-hidden="true"><img src={open ? "rose-bloom.webp" : "rose-bud-reference.png"} alt="" /></div>;
+  if (kind === "rose") return <div className="static-rose-fallback" aria-hidden="true"><img src={open ? "rose-bloom.webp" : "rose-bud-reference.webp"} width="900" height="1350" decoding="async" fetchPriority="high" alt="" /></div>;
   const colors = flowerCatalog[kind];
   const count = kind === "peony" || kind === "peach-rose" ? 11 : kind === "lily" || kind === "alstroemeria" ? 6 : 5;
   const flower = (x: number, y: number, scale: number) => <g transform={`translate(${x} ${y}) scale(${scale})`}>
