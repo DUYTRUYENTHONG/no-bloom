@@ -81,3 +81,47 @@ test("matching rose artwork moves through bud, opening, and bloom with a 3D arc"
   await expect(bloom).toHaveCSS("opacity", "1");
   await expect(bloom).toHaveJSProperty("naturalWidth", 1024);
 });
+
+test("flower, caption, controls, and greeting stay separated across responsive viewports", async ({ page }) => {
+  await page.setViewportSize({ width: 591, height: 604 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Mở món quà" }).click();
+  await page.getByRole("button", { name: "Tiếp tục không cần tên" }).click();
+  await page.getByRole("button", { name: "Mở ngay" }).click();
+  await expect(page.getByRole("heading", { name: "Chúc bạn một ngày 20/10 thật dịu dàng." })).toBeVisible();
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
+
+  for (const [width, height] of [[320, 568], [375, 667], [390, 844], [430, 932], [591, 604], [768, 900], [800, 600], [801, 600], [1024, 768], [1440, 900]]) {
+    await page.setViewportSize({ width, height });
+    await expect(page.locator(".story-panel")).toHaveCSS("order", width <= 800 ? "1" : "0");
+    if (width <= 800) {
+      const expectedFrameHeight = Math.round(Math.min(500, Math.max(280, height * 0.52)));
+      await expect.poll(async () => Math.round(await page.locator(".flower-frame").evaluate((element) => element.getBoundingClientRect().height))).toBe(expectedFrameHeight);
+    }
+    const layout = await page.evaluate(() => {
+      const bounds = (selector: string) => {
+        const rect = document.querySelector(selector)!.getBoundingClientRect();
+        return { top: rect.top + scrollY, bottom: rect.bottom + scrollY, height: rect.height };
+      };
+      return {
+        documentWidth: document.documentElement.scrollWidth,
+        frame: bounds(".flower-frame"),
+        artwork: bounds(".rose-bloom"),
+        caption: bounds(".flower-caption"),
+        mode: bounds(".mode-button"),
+        story: bounds(".story-panel"),
+        frameOverflow: getComputedStyle(document.querySelector(".flower-frame")!).overflow,
+      };
+    });
+    expect(layout.documentWidth, `${width}×${height}: horizontal overflow`).toBeLessThanOrEqual(width);
+    expect(layout.frameOverflow, `${width}×${height}: artwork clipping`).toBe("hidden");
+    expect(layout.artwork.bottom, `${width}×${height}: artwork outside frame`).toBeLessThanOrEqual(layout.frame.bottom + 1);
+    expect(layout.caption.top, `${width}×${height}: caption overlaps flower`).toBeGreaterThanOrEqual(layout.frame.bottom);
+    expect(layout.mode.top, `${width}×${height}: mode control overlaps caption`).toBeGreaterThanOrEqual(layout.caption.bottom);
+    if (width <= 800) {
+      expect(layout.story.top, `${width}×${height}: greeting overlaps flower`).toBeGreaterThanOrEqual(layout.mode.bottom);
+      expect(layout.story.top, `${width}×${height}: flower consumes the full first screen`).toBeLessThan(height);
+    }
+  }
+});

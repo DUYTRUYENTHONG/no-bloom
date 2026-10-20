@@ -38,11 +38,12 @@ export function Experience() {
   }, []);
 
   useEffect(() => {
-    if (stage === "greeting") headingRef.current?.focus();
+    if (stage === "greeting") headingRef.current?.focus({ preventScroll: true });
   }, [stage]);
 
   const finish = useCallback(() => {
     if (timer.current) clearTimeout(timer.current);
+    window.scrollTo({ top: 0, behavior: "instant" });
     setStage("greeting");
   }, []);
 
@@ -50,6 +51,7 @@ export function Experience() {
 
   function startBloom(selectedName: string | null) {
     if (timer.current) clearTimeout(timer.current);
+    window.scrollTo({ top: 0, behavior: staticMode || reducedMotion ? "instant" : "smooth" });
     setName(selectedName);
     setError("");
     setStage("blooming");
@@ -68,6 +70,7 @@ export function Experience() {
   function replay() { beginWither("replay"); }
   function beginWither(action: "replay" | "restart") {
     if (timer.current) clearTimeout(timer.current);
+    window.scrollTo({ top: 0, behavior: staticMode || reducedMotion ? "instant" : "smooth" });
     pendingAction.current = action;
     setStage("withering");
     if (staticMode || reducedMotion) timer.current = setTimeout(finishWither, 0);
