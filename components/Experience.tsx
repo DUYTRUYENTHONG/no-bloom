@@ -108,7 +108,7 @@ export function Experience() {
   return <main className={`experience stage-${stage}`} data-botanical-state={botanicalState} data-ui-component={payload.componentSpec.name}>
     <div className="page-wash" aria-hidden="true" />
     <header className="site-header">
-      <div className="brand" aria-label="NỞ">NỞ<span className="brand-mark">✳</span></div>
+      <div className="header-brand"><div className="brand" aria-label="NỞ">NỞ<span className="brand-mark">✳</span></div><VisitorCounter locale={locale} /></div>
       <div className="header-actions">
         <AnalyticsPreference locale={locale} />
         <label className="language-select"><span className="visually-hidden">{t.locale}</span><select value={locale} onChange={(event) => setLocale(event.target.value as Locale)} aria-label={t.locale}><option value="vi">VI</option><option value="en">EN</option></select></label>
@@ -155,7 +155,6 @@ export function Experience() {
           <RoseBloom key={flower} stage={stage} kind={flower} locale={locale} paused={paused} motionEnabled={!showStatic} onComplete={finish} onClosed={finishWither} onUnavailable={markSceneUnavailable} />
         </div>
         {reducedMotion && <p className="mode-note">{t.reduced}</p>}
-        <VisitorCounter locale={locale} />
       </section>
     </div>
     <FlowerGuide locale={locale} stage={stage} />

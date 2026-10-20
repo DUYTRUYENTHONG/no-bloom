@@ -4,10 +4,12 @@ const phoneViewports = [
   { width: 320, height: 568 },
   { width: 375, height: 667 },
   { width: 491, height: 604 },
+  { width: 755, height: 604 },
+  { width: 897, height: 604 },
 ];
 
 for (const viewport of phoneViewports) {
-  test(`${viewport.width}px guide uses a compact dock without covering the greeting`, async ({ page }) => {
+  test(`${viewport.width}px guide keeps the full actor at the bottom right`, async ({ page }) => {
     await page.setViewportSize(viewport);
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/?for=An");
@@ -15,27 +17,28 @@ for (const viewport of phoneViewports) {
     const guide = page.locator(".flower-guide");
     const trigger = page.getByRole("button", { name: "Mở bạn đồng hành" });
     await expect(page.locator(".greeting-content")).toBeVisible();
-    await expect(guide).toHaveCSS("position", "absolute");
+    await expect(guide).toHaveCSS("position", "fixed");
 
     const triggerBox = await trigger.boundingBox();
     expect(triggerBox).not.toBeNull();
     expect(triggerBox!.width).toBeGreaterThanOrEqual(44);
     expect(triggerBox!.height).toBeGreaterThanOrEqual(44);
-    expect(triggerBox!.width).toBeLessThanOrEqual(56);
-    expect(triggerBox!.height).toBeLessThanOrEqual(56);
+    expect(triggerBox!.width).toBeLessThanOrEqual(112);
+    expect(triggerBox!.height).toBeLessThanOrEqual(149);
     expect(triggerBox!.x + triggerBox!.width).toBeLessThanOrEqual(viewport.width - 8 + 0.5);
 
-    for (const selector of [".letter", ".greeting-actions"]) {
-      const protectedContent = page.locator(selector);
-      await protectedContent.scrollIntoViewIfNeeded();
-      const overlap = await page.evaluate(({ actorSelector, contentSelector }) => {
-        const actor = document.querySelector(actorSelector)!.getBoundingClientRect();
-        const content = document.querySelector(contentSelector)!.getBoundingClientRect();
-        return Math.max(0, Math.min(actor.right, content.right) - Math.max(actor.left, content.left))
-          * Math.max(0, Math.min(actor.bottom, content.bottom) - Math.max(actor.top, content.top));
-      }, { actorSelector: ".guide-actor-button", contentSelector: selector });
+    expect(triggerBox!.y + triggerBox!.height).toBeLessThanOrEqual(viewport.height - 8 + .5);
+    expect(triggerBox!.y).toBeGreaterThan(viewport.height - 170);
+    await expect(trigger.locator('img')).toHaveCSS('object-fit','contain');
+    expect(await trigger.locator('img').evaluate(e=>e.getBoundingClientRect().height)).toBeCloseTo(triggerBox!.height,1);
+    await expect(trigger.locator(':scope > span[aria-hidden]')).toHaveCount(0);
+    for (const button of await page.locator('.greeting-actions button').all()) {
+      await button.evaluate(e=>e.scrollIntoView({block:'center'}));
+      const actor=await trigger.boundingBox(), action=await button.boundingBox();
+      const overlap=Math.max(0,Math.min(actor!.x+actor!.width,action!.x+action!.width)-Math.max(actor!.x,action!.x))*Math.max(0,Math.min(actor!.y+actor!.height,action!.y+action!.height)-Math.max(actor!.y,action!.y));
       expect(overlap).toBe(0);
     }
+
   });
 }
 

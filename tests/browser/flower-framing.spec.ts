@@ -13,7 +13,12 @@ for (const [width,height] of [[1440,900],[1024,768],[768,1024],[665,604],[390,84
     await expect(page.locator('canvas, .static-rose-fallback svg')).toHaveCount(0);
     await page.keyboard.press("Escape");
     for(const state of ['invitation','greeting']) {
-      const box=await image.boundingBox();const stage=await frame.boundingBox();
+      // Read both rectangles in one frame: WebKit can finish its automatic
+      // focus scroll between separate protocol calls after the greeting opens.
+      const {box,stage}=await image.evaluate(element=>({
+        box:element.getBoundingClientRect().toJSON(),
+        stage:element.closest('.flower-frame')!.getBoundingClientRect().toJSON(),
+      }));
       expect(box!.x).toBeGreaterThanOrEqual(stage!.x);
       expect(box!.y).toBeGreaterThanOrEqual(stage!.y);
       expect(box!.x+box!.width).toBeLessThanOrEqual(stage!.x+stage!.width);

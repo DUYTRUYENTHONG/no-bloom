@@ -1,3 +1,7 @@
+# Historical Supabase analytics implementation
+
+The active visitor counter now follows docs/visitor-counter.md and uses a separate Vercel function with Upstash Redis. The earlier Supabase collectors remain unprovisioned/disabled and are not the current counter deployment target. The latest traffic brief uses UTC daily metrics.
+
 # Optional visitor analytics
 
 ## Architecture and current repository state

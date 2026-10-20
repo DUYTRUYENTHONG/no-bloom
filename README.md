@@ -13,7 +13,7 @@ npm run dev
 
 Open `http://localhost:3000`. Run `npm test`, `npm run test:e2e`, `npm run typecheck`, and `npm run build` for checks. The browser suite uses installed Chrome.
 
-GitHub Actions exports the gift to GitHub Pages. Optional analytics, the visitor counter, and Groq guide use separate Supabase Edge Functions; Pages cannot execute those functions. The gift itself runs when they are unavailable.
+GitHub Actions exports the gift to GitHub Pages. The active visitor counter uses a separate Vercel function with Upstash Redis. Historical Supabase analytics and the prepared Groq guide remain unprovisioned; Pages cannot execute server functions. The gift itself runs when they are unavailable.
 
 ## Current scope
 
@@ -22,4 +22,4 @@ Personal share links and the optional Groq guide are documented in [personal lin
 
 Optional visitor analytics is prepared separately for Supabase and remains disabled until configured and deployed. See [visitor analytics](docs/visitor-analytics.md).
 
-The optional recognized-browser counter is also prepared for Supabase and disabled by default. It shares the consent choice but has separate storage and counting semantics. See [visitor counter](docs/visitor-counter.md).
+The optional traffic counter is prepared for Vercel + Upstash Redis and disabled until connected. It reports consenting page views and approximate unique browsers in a small top-left header display. It honors existing permission and Global Privacy Control, sends no role/name/greeting, and has private local reporting. See [visitor counter](docs/visitor-counter.md).

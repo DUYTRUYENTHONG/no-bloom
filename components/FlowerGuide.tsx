@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Locale } from "@/lib/content";
 import dynamic from "next/dynamic";
 import { ActorIntroduction } from "./ActorIntroduction";
@@ -42,7 +42,10 @@ export function FlowerGuide({ locale, stage }: { locale: Locale; stage: Stage })
   const [busy, setBusy] = useState(false);
   const [acting, setActing] = useState(false);
   const [dancing, setDancing] = useState(false);
+  const [welcoming, setWelcoming] = useState(false);
   const [introducing, setIntroducing] = useState(false);
+  const [introductionSettled, setIntroductionSettled] = useState(stage !== "invitation");
+  const [dismissedHint, setDismissedHint] = useState<Stage | null>(null);
   const actor = useRef<HTMLSpanElement>(null);
   const pointerActor = useRef<HTMLSpanElement>(null);
   const abort = useRef<AbortController | null>(null);
@@ -50,6 +53,81 @@ export function FlowerGuide({ locale, stage }: { locale: Locale; stage: Stage })
   const panel = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
+  const cancelWelcome = useRef<(() => void) | null>(null);
+  const introWelcomePlayed = useRef(false);
+  const openRef = useRef(open);
+  openRef.current = open;
+
+  const stopAutomaticWelcome = useCallback(() => cancelWelcome.current?.(), []);
+  const handleIntroductionChange = useCallback((active: boolean) => {
+    setIntroducing(active);
+    if (!active) setIntroductionSettled(true);
+  }, []);
+  const handleDancePlaying = useCallback((playing: boolean) => {
+    if (playing) stopAutomaticWelcome();
+    setDancing(playing);
+  }, [stopAutomaticWelcome]);
+
+  useEffect(() => {
+    if (stage !== "invitation" || window.matchMedia("(prefers-reduced-motion: reduce)").matches || !Element.prototype.animate) setIntroductionSettled(true);
+  }, [stage]);
+
+  useEffect(() => {
+    stopAutomaticWelcome();
+    const afterIntroduction = stage === "invitation" && introductionSettled && !introWelcomePlayed.current;
+    if (openRef.current || (stage !== "greeting" && !afterIntroduction)) return;
+    if (afterIntroduction) introWelcomePlayed.current = true;
+
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let remaining = 6000;
+    let startedAt = 0;
+    let timer = 0;
+    let running = false;
+    let disposed = motion.matches;
+
+    const finish = () => {
+      if (disposed) return;
+      disposed = true;
+      running = false;
+      window.clearTimeout(timer);
+      setWelcoming(false);
+    };
+    const pause = () => {
+      if (!running || disposed) return;
+      remaining = Math.max(0, remaining - (performance.now() - startedAt));
+      running = false;
+      window.clearTimeout(timer);
+      setWelcoming(false);
+    };
+    const resume = () => {
+      if (disposed || running || document.hidden || motion.matches) return;
+      if (remaining <= 0) { finish(); return; }
+      running = true;
+      startedAt = performance.now();
+      setWelcoming(true);
+      timer = window.setTimeout(finish, remaining);
+    };
+    const cancel = () => {
+      if (disposed) return;
+      disposed = true;
+      running = false;
+      window.clearTimeout(timer);
+      setWelcoming(false);
+    };
+    const visibility = () => { if (document.hidden) pause(); else resume(); };
+    const motionChange = () => { if (motion.matches) cancel(); };
+
+    cancelWelcome.current = cancel;
+    document.addEventListener("visibilitychange", visibility);
+    motion.addEventListener("change", motionChange);
+    resume();
+    return () => {
+      cancel();
+      if (cancelWelcome.current === cancel) cancelWelcome.current = null;
+      document.removeEventListener("visibilitychange", visibility);
+      motion.removeEventListener("change", motionChange);
+    };
+  }, [introductionSettled, stage, stopAutomaticWelcome]);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -117,8 +195,10 @@ export function FlowerGuide({ locale, stage }: { locale: Locale; stage: Stage })
     } finally { if (!controller.signal.aborted) setBusy(false); }
   }
 
-  return <aside className={`flower-guide ${open ? "is-open" : ""} ${dancing ? "is-dancing" : ""} ${introducing ? "is-introducing" : ""}`} aria-label={t.title}>
-    <ActorIntroduction locale={locale} stage={stage} dock={trigger} onActiveChange={setIntroducing} />
+  const showHint = !open && !introducing && introductionSettled && dismissedHint !== stage;
+
+  return <aside className={`flower-guide ${open ? "is-open" : ""} ${dancing ? "is-dancing" : ""} ${welcoming ? "is-welcoming" : ""} ${introducing ? "is-introducing" : ""}`} aria-label={t.title}>
+    <ActorIntroduction locale={locale} stage={stage} dock={trigger} onActiveChange={handleIntroductionChange} />
     {open && <div ref={panel} id="flower-guide-panel" className="guide-panel" role="dialog" aria-labelledby="flower-guide-title" tabIndex={-1} onKeyDown={(event) => { if (event.key === "Escape") { event.stopPropagation(); close(); } }}>
       <div className="guide-heading"><strong id="flower-guide-title">{t.title}</strong><button ref={closeButton} type="button" onClick={close} aria-label={t.close}>×</button></div>
       <p className="guide-intro">{t.intro} {t.stage[stage]}</p>
@@ -127,11 +207,11 @@ export function FlowerGuide({ locale, stage }: { locale: Locale; stage: Stage })
       {endpoint && <form className="guide-form" onSubmit={(event) => { event.preventDefault(); void send(question); }}><label className="visually-hidden" htmlFor="guide-question">{t.placeholder}</label><input id="guide-question" value={question} onChange={(event) => setQuestion(event.target.value)} placeholder={t.placeholder} maxLength={400} disabled={busy} /><button type="submit" disabled={busy || !question.trim()}>{busy ? t.waiting : t.send}</button></form>}
       {endpoint && <p className="guide-disclosure">{t.disclosure}</p>}
       {!endpoint && <p className="guide-disclosure">{t.offline}</p>}
-      <DanceMoment locale={locale} onPlayingChange={setDancing} />
+      <DanceMoment locale={locale} onPlayingChange={handleDancePlaying} />
     </div>}
-    <button ref={trigger} className="guide-actor-button" type="button" aria-label={open ? t.close : t.open} aria-expanded={open} aria-controls="flower-guide-panel" onPointerMove={leanTowardPointer} onPointerLeave={() => { if (pointerActor.current) pointerActor.current.style.transform = ""; }} onClick={() => { if (open) close(); else { setOpen(true); requestAnimationFrame(() => closeButton.current?.focus()); } }}>
-      <span ref={actor} className="guide-scroll-motion"><span ref={pointerActor} className="guide-pointer-motion">{dancing ? <span className="guide-dance-sprite" style={{ backgroundImage: "url('guide-dance.webp')" }} aria-hidden="true" /> : <img className={acting ? "is-acting" : ""} src={busy ? "guide-avatar-thinking.webp" : open || stage === "greeting" ? "guide-avatar-wave.webp" : "guide-avatar.webp"} width="112" height="145" decoding="async" alt="" />}</span></span>
-      <span aria-hidden="true">{open ? "×" : "?"}</span>
+    {showHint && <div className="guide-hint" role="status"><p>{t.stage[stage]}</p><button className="guide-hint-close" type="button" aria-label={locale === "vi" ? "Ẩn gợi ý" : "Dismiss tip"} onClick={() => { setDismissedHint(stage); stopAutomaticWelcome(); }}>×</button></div>}
+    <button ref={trigger} className="guide-actor-button" type="button" aria-label={open ? t.close : t.open} aria-expanded={open} aria-controls="flower-guide-panel" onPointerMove={leanTowardPointer} onPointerLeave={() => { if (pointerActor.current) pointerActor.current.style.transform = ""; }} onClick={() => { stopAutomaticWelcome(); if (open) close(); else { setOpen(true); requestAnimationFrame(() => closeButton.current?.focus()); } }}>
+      <span ref={actor} className="guide-scroll-motion"><span ref={pointerActor} className="guide-pointer-motion">{dancing || welcoming ? <span className="guide-dance-sprite" style={{ backgroundImage: "url('guide-dance.webp')" }} aria-hidden="true" /> : <img className={acting ? "is-acting" : ""} src={busy ? "guide-avatar-thinking.webp" : open || stage === "greeting" ? "guide-avatar-wave.webp" : "guide-avatar.webp"} width="112" height="145" decoding="async" alt="" />}</span></span>
     </button>
   </aside>;
 }

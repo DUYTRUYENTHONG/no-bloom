@@ -10,3 +10,5 @@ supabase/functions/.env
 .qa-cache/
 .qa-lock
 artifacts/quality/
+
+.vercel/

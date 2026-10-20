@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import {TrafficObserver} from "@/components/TrafficObserver";
 
 export const metadata: Metadata = {
   title: "No-bloom happy vietnamese woman days | NỞ",
@@ -8,5 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="vi"><body>{children}</body></html>;
+  return <html lang="vi"><body><TrafficObserver />{children}</body></html>;
 }

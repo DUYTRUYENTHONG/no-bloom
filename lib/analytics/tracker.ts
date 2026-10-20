@@ -149,7 +149,7 @@ export function getPageViewTracker() {
     let storage: Storage | undefined;
     try { storage = window.localStorage; } catch { /* unavailable */ }
     singleton = new PageViewTracker({
-      enabled: process.env.NEXT_PUBLIC_ANALYTICS_ENABLED === "true",
+      enabled: process.env.NEXT_PUBLIC_ANALYTICS_ENABLED === "true" && process.env.NEXT_PUBLIC_COUNTER_ENABLED !== "true",
       endpoint: process.env.NEXT_PUBLIC_ANALYTICS_ENDPOINT ?? "",
       isProduction: process.env.NODE_ENV === "production",
       allowLocalTest: process.env.NEXT_PUBLIC_ANALYTICS_TEST_MODE === "true",

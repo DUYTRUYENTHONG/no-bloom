@@ -9,12 +9,13 @@ export async function fingerprint() {
   const files = [];
   async function walk(directory) {
     for (const entry of await readdir(join(root, directory), { withFileTypes: true }).catch(() => [])) {
+      if (["node_modules", ".vercel"].includes(entry.name) || (entry.name.startsWith(".env") && entry.name !== ".env.example")) continue;
       const path = join(directory, entry.name);
       if (entry.isDirectory()) await walk(path);
       else if (entry.isFile()) files.push(path);
     }
   }
-  for (const directory of ["app", "components", "lib", "public", "scripts", "tests", "supabase", ".github", ".codex"]) await walk(directory);
+  for (const directory of ["app", "components", "lib", "public", "scripts", "tests", "supabase", "services", ".github", ".codex"]) await walk(directory);
   files.push("package.json", "package-lock.json", "next.config.ts", "tsconfig.json", "playwright.config.ts");
   const hash = createHash("sha256");
   for (const file of files.sort()) { hash.update(file.replaceAll(sep, "/")); hash.update(await readFile(join(root, file))); }

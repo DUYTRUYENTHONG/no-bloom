@@ -1,0 +1,28 @@
+name: Traffic Redis QA
+on:
+  push:
+    branches: [main, 'codex/**']
+    paths: ['services/traffic/**', 'lib/traffic/**', 'tests/traffic.test.ts', 'scripts/test-traffic-redis.ts', '.github/workflows/traffic-tests.yml', 'package-lock.json']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  redis:
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7.4-alpine
+        ports: ['6379:6379']
+        options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 3s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npx tsx --test tests/traffic.test.ts
+      - run: npx tsx scripts/test-traffic-redis.ts
+        env:
+          TRAFFIC_REDIS_TEST_URL: redis://127.0.0.1:6379

@@ -1,85 +1,29 @@
-import assert from "node:assert/strict";
-import { createServer } from "node:http";
-import { readFile } from "node:fs/promises";
-import { resolve, extname, join } from "node:path";
-import { chromium } from "@playwright/test";
-
-const root = resolve("out");
-const records = new Map();
-const requests = [];
-const mime = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".webp": "image/webp", ".png": "image/png", ".svg": "image/svg+xml", ".woff2": "font/woff2" };
-const collector = createServer(async (request, response) => {
-  response.setHeader("Access-Control-Allow-Origin", "http://127.0.0.1:3204");
-  response.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  response.setHeader("Access-Control-Allow-Headers", "content-type");
-  response.setHeader("Cache-Control", "private, no-store");
-  if (request.method === "OPTIONS") { response.writeHead(204).end(); return; }
-  if (request.method !== "POST") { response.writeHead(405).end(); return; }
-  let body = "";
-  for await (const chunk of request) body += chunk;
-  const payload = JSON.parse(body);
-  requests.push(payload);
-  if (!records.has(payload.visitorId)) records.set(payload.visitorId, records.size + 1);
-  response.setHeader("Content-Type", "application/json");
-  response.writeHead(200).end(JSON.stringify({ total: records.size, ordinal: records.get(payload.visitorId), roleCount: records.size, countries: 0 }));
+import assert from 'node:assert/strict';import{createServer}from'node:http';import{readFile}from'node:fs/promises';import{resolve,extname,sep}from'node:path';import{chromium,expect}from'@playwright/test';import AxeBuilder from'@axe-core/playwright';
+const root=resolve('out'),events=new Map(),browsers=new Set(),requests=[];let reads=0,loseFirst=true,unavailable=false;
+const mime={'.html':'text/html','.js':'application/javascript','.css':'text/css','.webp':'image/webp','.png':'image/png','.svg':'image/svg+xml','.woff2':'font/woff2','.mp4':'video/mp4'};
+const collector=createServer(async(req,res)=>{
+ res.setHeader('Access-Control-Allow-Origin','http://127.0.0.1:3204');res.setHeader('Access-Control-Allow-Methods','GET, POST, OPTIONS');res.setHeader('Access-Control-Allow-Headers','content-type');res.setHeader('Cache-Control','no-store');res.setHeader('Content-Type','application/json');
+ if(req.method==='OPTIONS'){res.writeHead(204).end();return;}
+ if(unavailable){res.writeHead(503).end('{}');return;}
+ if(req.method==='GET'){reads++;res.end(JSON.stringify({pageViews:events.size,uniqueBrowsers:browsers.size}));return;}
+ if(req.method!=='POST'){res.writeHead(405).end();return;}
+ let bytes='';for await(const c of req)bytes+=c;const p=JSON.parse(bytes);assert.deepEqual(Object.keys(p).sort(),['eventId','path','visitorId']);assert.ok(['/','/credits'].includes(p.path));requests.push(p);if(!events.has(p.eventId)){events.set(p.eventId,p);browsers.add(p.visitorId);}
+ if(loseFirst){loseFirst=false;res.writeHead(503).end('{}');return;}res.end('{"recorded":true}');
 });
-const site = createServer(async (request, response) => {
-  const pathname = new URL(request.url, "http://127.0.0.1").pathname;
-  const relative = decodeURIComponent(pathname.replace(/^\/no-bloom\/?/, "")) || "index.html";
-  const file = resolve(join(root, relative.endsWith("/") ? `${relative}index.html` : relative));
-  if (!file.startsWith(root)) { response.writeHead(403).end(); return; }
-  try {
-    const contents = await readFile(file);
-    response.setHeader("Content-Type", mime[extname(file)] ?? "application/octet-stream");
-    response.writeHead(200).end(contents);
-  } catch { response.writeHead(404).end(); }
-});
-async function waitFor(count) {
-  const deadline = Date.now() + 5000;
-  while (requests.length < count && Date.now() < deadline) await new Promise((resolve) => setTimeout(resolve, 25));
-  assert.equal(requests.length, count);
-}
-await Promise.all([new Promise((resolve) => collector.listen(3205, "127.0.0.1", resolve)), new Promise((resolve) => site.listen(3204, "127.0.0.1", resolve))]);
-const browser = await chromium.launch({ channel: "chrome", headless: true });
-try {
-  const first = await browser.newContext({ reducedMotion: "reduce" });
-  const page = await first.newPage();
-  await page.goto("http://127.0.0.1:3204/no-bloom/");
-  await page.getByRole("button", { name: "Đồng ý" }).waitFor();
-  assert.equal(requests.length, 0);
-  await page.getByRole("button", { name: "Đồng ý" }).click();
-  await waitFor(1);
-  await page.getByText(/1 trình duyệt/).waitFor();
-  assert.deepEqual(Object.keys(requests[0]).sort(), ["role", "visitorId"]);
-  await page.getByRole("button", { name: "Mở món quà" }).click();
-  await page.locator("#flower-kind").selectOption("orchid");
-  await page.getByRole("textbox", { name: "Tên của bạn" }).fill("Mai");
-  await page.getByRole("button", { name: "Để hoa nở vì bạn" }).click();
-  await page.getByRole("heading", { name: /Mai, chúc bạn/ }).waitFor();
-  assert.equal(JSON.stringify(requests).includes("Mai"), false);
-  assert.equal(requests.length, 1);
-  await page.reload();
-  await waitFor(2);
-  assert.equal(requests[0].visitorId, requests[1].visitorId);
-  assert.equal(records.size, 1);
-  await page.getByRole("button", { name: "Quyền riêng tư" }).click();
-  await page.getByRole("button", { name: "Không, cảm ơn" }).click();
-  assert.equal(await page.evaluate(() => localStorage.getItem("no-bloom:counter-visitor")), null);
-  await page.reload(); await page.waitForTimeout(200);
-  assert.equal(requests.length, 2);
-  await first.close();
-
-  const second = await browser.newContext({ reducedMotion: "reduce" });
-  const other = await second.newPage();
-  await other.goto("http://127.0.0.1:3204/no-bloom/");
-  await other.getByRole("button", { name: "Đồng ý" }).click();
-  await waitFor(3);
-  assert.equal(records.size, 2);
-  assert.notEqual(requests[2].visitorId, requests[0].visitorId);
-  await other.getByText(/2 trình duyệt/).waitFor();
-  await second.close();
-  console.log("Exported site: consent, first visit, repeat ordinal, second browser, withdrawal, and gift isolation passed against a local counter stub.");
-} finally {
-  await browser.close();
-  await Promise.all([new Promise((resolve) => collector.close(resolve)), new Promise((resolve) => site.close(resolve))]);
-}
+const site=createServer(async(req,res)=>{const pathname=new URL(req.url,'http://localhost').pathname;const relative=decodeURIComponent(pathname.replace(/^\/no-bloom\/?/,''))||'index.html',file=resolve(root,relative.endsWith('/')?relative+'index.html':relative);if(!file.startsWith(root+sep)){res.writeHead(403).end();return;}try{res.setHeader('Content-Type',mime[extname(file)]??'application/octet-stream');res.end(await readFile(file));}catch{res.writeHead(404).end();}});
+await Promise.all([new Promise(r=>collector.listen(3205,'127.0.0.1',r)),new Promise(r=>site.listen(3204,'127.0.0.1',r))]);
+const browser=await chromium.launch({...(process.env.CI?{}:{channel:'chrome'}),headless:true}),url='http://127.0.0.1:3204/no-bloom/';
+async function count(n){await expect.poll(()=>events.size).toBe(n);}
+try{
+ const first=await browser.newContext({reducedMotion:'reduce',viewport:{width:320,height:568}}),page=await first.newPage();page.on('pageerror',e=>console.error(e.message));await page.goto(url+'?for=PrivateName&utm_source=facebook#private-token');await page.getByRole('button',{name:'Đồng ý'}).waitFor();assert.equal(requests.length,0);assert.equal(reads,0);await page.getByRole('button',{name:'Đồng ý'}).click();try{await count(1);}catch(error){console.error(await page.evaluate(()=>({path:location.pathname,consent:localStorage.getItem('no-bloom:analytics-consent'),counter:document.querySelector('.visitor-counter')?.textContent})));throw error;}await expect(page.locator('.site-header .visitor-counter')).toContainText('1 lượt xem');assert.equal(requests.length,2);assert.equal(requests[0].eventId,requests[1].eventId);assert.ok(!JSON.stringify(requests).includes('PrivateName'));
+ const counter=await page.locator('.site-header .visitor-counter').boundingBox();assert.ok(counter.y<100&&counter.x<40);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));const scan=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();assert.deepEqual(scan.violations,[]);
+ await page.reload();await count(2);assert.equal(requests[2].visitorId,requests[0].visitorId);assert.notEqual(requests[2].eventId,requests[0].eventId);assert.equal(browsers.size,1);
+ await page.evaluate(()=>history.pushState({},'','#another-fragment'));await page.waitForTimeout(100);assert.equal(events.size,2);
+ await page.evaluate(()=>history.pushState({},'','/no-bloom/credits/'));await count(3);assert.equal(requests.at(-1).path,'/credits');await page.evaluate(()=>history.pushState({},'','/no-bloom/'));await count(4);
+ await page.getByRole('button',{name:'Quyền riêng tư'}).click();await page.getByRole('button',{name:'Không, cảm ơn'}).click();assert.equal(await page.evaluate(()=>localStorage.getItem('no-bloom-visitor-id')),null);await page.reload();await page.waitForTimeout(100);assert.equal(events.size,4);await first.close();
+ const second=await browser.newContext({reducedMotion:'reduce'}),other=await second.newPage();await other.goto(url);await other.getByRole('button',{name:'Đồng ý'}).click();await count(5);assert.equal(browsers.size,2);await second.close();
+ const storage=await browser.newContext({reducedMotion:'reduce'});await storage.addInitScript(()=>{for(const method of['getItem','setItem','removeItem'])Object.defineProperty(Storage.prototype,method,{configurable:true,value(){throw Error('blocked')}})});const temp=await storage.newPage();await temp.goto(url);await temp.getByRole('button',{name:'Đồng ý'}).click();await count(6);assert.equal(browsers.size,3);await temp.reload();await temp.waitForTimeout(100);assert.equal(events.size,6);await storage.close();
+ const gpc=await browser.newContext({reducedMotion:'reduce'});await gpc.addInitScript(()=>{Object.defineProperty(navigator,'globalPrivacyControl',{value:true});localStorage.setItem('no-bloom:analytics-consent','accepted')});const privatePage=await gpc.newPage();const before=requests.length,beforeReads=reads;await privatePage.goto(url);await privatePage.locator('.header-brand').waitFor();await privatePage.waitForTimeout(100);assert.equal(requests.length,before);assert.equal(reads,beforeReads);await gpc.close();
+ unavailable=true;const failed=await browser.newContext({reducedMotion:'reduce'}),gift=await failed.newPage();await gift.goto(url);await gift.getByRole('button',{name:'Đồng ý'}).click();await gift.getByRole('button',{name:'Mở món quà'}).click();await gift.getByRole('textbox',{name:'Tên của bạn'}).fill('QA');await gift.getByRole('button',{name:'Để hoa nở vì bạn'}).click();await expect(gift.getByRole('heading',{name:/QA, chúc bạn/})).toBeVisible();await failed.close();
+ console.log('Exported traffic: consent/GPC, lost-response retry, reload, normalized native history navigation/hash exclusion, browser contexts, storage failure, withdrawal, top-left layout/axe and gift isolation passed. Isolated local mock collector only.');
+}finally{await browser.close();await Promise.all([new Promise(r=>collector.close(r)),new Promise(r=>site.close(r))]);}

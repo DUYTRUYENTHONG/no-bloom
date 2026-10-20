@@ -54,6 +54,15 @@ test("actor introduction yields immediately to gift and mobile scroll", async ({
 for (const [width, height] of [[1440,900],[390,844],[320,568],[844,390]]) {
   test(`actor introduction remains framed at ${width}x${height}`, async ({ page }) => {
     await page.setViewportSize({ width, height });
+    // Capture the real timeline deterministically from its first frame.
+    await page.addInitScript(() => {
+      const original = Element.prototype.animate;
+      Element.prototype.animate = function (frames, options) {
+        const animation = original.call(this, frames, options);
+        if (this.matches('.actor-introduction>img')) animation.pause();
+        return animation;
+      };
+    });
     await page.goto("/");
     await expect(page.locator(".actor-introduction")).toHaveAttribute("data-active", "true");
     for (const time of [0,800,1400,2400,3200]) {

@@ -40,7 +40,7 @@ test("clipboard rejection offers a usable personal link", async ({ page }) => {
   expect(link.searchParams.get("for")).toBe("An");
   expect(link.searchParams.get("flower")).toBe("peony");
   expect(link.searchParams.get("wish")).toBe(complimentId);
-  await expect(page.getByRole("status")).toContainText("Không thể sao chép");
+  await expect(page.locator(".copy-status")).toContainText("Không thể sao chép");
   await expect(fallback).toBeFocused();
 });
 
