@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test("greeting celebration is finite, nonblocking, and replays with the greeting", async ({ page }) => {
+  await page.clock.install();
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/");
   await page.getByRole("button", { name: "Mở món quà" }).click();
@@ -28,7 +29,10 @@ test("greeting celebration is finite, nonblocking, and replays with the greeting
   });
   expect(textIsClear).toBe(true);
 
-  await expect(particles).toHaveCount(0, { timeout: 5000 });
+  // Verify the actual cleanup deadline without spending the test's remaining
+  // wall-clock budget waiting after a cold development-server compilation.
+  await page.clock.fastForward(3200);
+  await expect(particles).toHaveCount(0);
   await expect(celebration).toBeVisible();
 
   await page.getByRole("button", { name: "Xem hoa nở lại" }).click();
