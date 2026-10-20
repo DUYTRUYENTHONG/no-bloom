@@ -47,8 +47,6 @@ form .primary-button{margin-top:26px}
 .flower-panel{min-height:580px;min-width:0;width:100%;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .flower-halo{position:absolute;inset:9% 6% 12%;background:radial-gradient(ellipse at center,#f5cfd9 0%,#f7e1e2 44%,transparent 72%);opacity:.78;pointer-events:none;z-index:-1}
 .flower-frame{width:100%;min-width:0;height:min(69vh,650px);min-height:470px;position:relative}
-.flower-frame canvas{display:block}
-.static-flower{width:100%;height:100%;display:block;filter:drop-shadow(0 14px 15px #88506220)}
 .flower-caption{display:flex;align-items:center;width:100%;justify-content:center;gap:17px;color:#937b83;margin-top:-12px}
 .caption-line{height:1px;width:44px;background:#caa6ad}
 .caption-name{color:var(--plum)}
@@ -98,14 +96,33 @@ input:focus{border-color:#e0f395;box-shadow:0 2px 0 #e0f395}
 .mode-button{color:#d5e994;min-height:44px;min-width:130px}
 .mode-button:disabled{color:#a8b889}
 .mode-note{color:#c7d5a5}
-.rose-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;z-index:2;pointer-events:none;opacity:0;transform:translateY(22px) scale(.94);transition:opacity .65s ease,transform .8s cubic-bezier(.2,.7,.2,1);filter:brightness(1.12) saturate(1.12) drop-shadow(0 30px 28px #0009)}
-.rose-photo.is-visible{opacity:1;transform:translateY(0) scale(1.07)}
-.stage-withering .rose-photo.is-visible{opacity:0;transform:translateY(24px) scale(.72);transition-duration:.45s}
-.stage-withering .flower-frame canvas,.stage-withering .static-flower{filter:grayscale(.75) sepia(.2)}
-.stage-personalization .static-flower{transform:scale(1.04)}
 [data-botanical-state="WITHER_RELOAD"] .field-error{color:#eec290}
-.stage-greeting .flower-frame canvas,.stage-greeting .flower-frame .static-flower{opacity:0}
-.static-flower{filter:drop-shadow(0 18px 20px #0007)}
-@media(max-width:800px){.site-header{border-bottom:1px solid #b9cc7838}.flower-panel:before{top:3%;right:10%;font-size:clamp(100px,28vw,190px)}.flower-panel{padding-bottom:22px}.story-panel{border-top:1px solid #b6ca7130;padding-top:24px}.letter{margin-top:24px}.rose-photo{object-position:center 42%}.rose-photo.is-visible{transform:translateY(0) scale(1.23)}}
+.rose-bloom{position:absolute;inset:0;overflow:hidden;perspective:1100px;isolation:isolate;pointer-events:none}
+.rose-depth{position:absolute;inset:-1%;transform-style:preserve-3d;transform-origin:50% 32%;mask-image:linear-gradient(to bottom,transparent 0%,#000 12%,#000 76%,transparent 100%),linear-gradient(to right,transparent 0%,#000 8%,#000 92%,transparent 100%);mask-composite:intersect;filter:drop-shadow(0 26px 28px #0007)}
+.rose-phase{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;display:block;backface-visibility:hidden;will-change:opacity;transform:translateZ(1px)}
+.rose-phase--bud{opacity:1}
+.rose-phase--opening,.rose-phase--bloom{opacity:0}
+.rose-light{position:absolute;inset:1% 7% 20%;background:radial-gradient(ellipse at 54% 20%,#f63d891e,transparent 54%);mix-blend-mode:screen;opacity:.55;pointer-events:none}
+.flower-caption{position:relative;z-index:2;margin-top:8px}
+.rose-bloom--personalization .rose-phase--opening{opacity:1;transition:opacity .7s ease}
+.rose-bloom--blooming .rose-phase--opening{animation:rose-opening var(--bloom-duration) ease-in-out both}
+.rose-bloom--blooming .rose-phase--bloom{animation:rose-reveal var(--bloom-duration) ease-in-out both}
+.rose-bloom--blooming.rose-bloom--motion .rose-depth{animation:rose-arc var(--bloom-duration) cubic-bezier(.2,.7,.2,1) both}
+.rose-bloom--greeting .rose-phase--bloom{opacity:1}
+.rose-bloom--greeting.rose-bloom--motion .rose-depth{transform:rotateY(0deg) rotateX(0deg) translateZ(18px) scale(1.03)}
+.rose-bloom--withering .rose-phase--opening{animation:rose-close-mid .45s ease-in-out both}
+.rose-bloom--withering .rose-phase--bloom{animation:rose-close-full .45s ease-in-out both}
+.rose-bloom--withering.rose-bloom--motion .rose-depth{animation:rose-contract .45s ease-in-out both;filter:grayscale(.4) sepia(.12)}
+.rose-bloom--still .rose-depth{transform:none!important;animation:none!important}
+.rose-bloom--still.rose-bloom--blooming .rose-phase--opening,.rose-bloom--still.rose-bloom--withering .rose-phase--opening{animation:none;opacity:0}
+.rose-bloom--still.rose-bloom--blooming .rose-phase--bloom{animation:none;opacity:1}
+.rose-bloom--still.rose-bloom--withering .rose-phase--bloom{animation:none;opacity:0}
+@keyframes rose-opening{0%,34%{opacity:1}73%,100%{opacity:0}}
+@keyframes rose-reveal{0%,34%{opacity:0}80%,100%{opacity:1}}
+@keyframes rose-arc{0%{transform:rotateY(-12deg) rotateX(4deg) translateZ(-12px) scale(.95)}48%{transform:rotateY(7deg) rotateX(-2deg) translateZ(13px) scale(1.01)}100%{transform:rotateY(0) rotateX(0) translateZ(18px) scale(1.03)}}
+@keyframes rose-close-mid{0%,15%{opacity:0}48%{opacity:1}100%{opacity:0}}
+@keyframes rose-close-full{0%,15%{opacity:1}64%,100%{opacity:0}}
+@keyframes rose-contract{0%{transform:rotateY(0) translateZ(18px) scale(1.03)}50%{transform:rotateY(-7deg) translateZ(0) scale(.98)}100%{transform:rotateY(-12deg) translateZ(-12px) scale(.95)}}
+@media(max-width:800px){.site-header{border-bottom:1px solid #b9cc7838}.flower-panel:before{top:3%;right:10%;font-size:clamp(100px,28vw,190px)}.flower-panel{padding-bottom:22px}.flower-frame{height:clamp(390px,57svh,550px);min-height:390px}.story-panel{border-top:1px solid #b6ca7130;padding-top:24px}.letter{margin-top:24px}}
 @media(max-width:480px){.site-header{height:68px}.experience-grid{min-height:calc(100svh - 68px)}.flower-panel{padding-bottom:17px}.story-content{padding-top:13px}.letter{padding:22px}.greeting-content h1{font-size:clamp(34px,9vw,46px)}}
-@media(prefers-reduced-motion:reduce){.rose-photo{transition:none;transform:none}}
+@media(prefers-reduced-motion:reduce){.rose-depth,.rose-phase{animation:none!important;transition:none!important;transform:none!important}.rose-bloom--blooming .rose-phase--opening,.rose-bloom--withering .rose-phase--opening{opacity:0}.rose-bloom--blooming .rose-phase--bloom{opacity:1}.rose-bloom--withering .rose-phase--bloom{opacity:0}}

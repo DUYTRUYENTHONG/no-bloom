@@ -63,3 +63,21 @@ test("botanical payloads follow the gift lifecycle and use the approved FloralGr
   expect(payloads.map((payload) => payload.botanicalState)).toEqual(expect.arrayContaining(["BUD", "SPROUT", "WITHER_RELOAD", "BLOOMING", "FULL_BLOOM"]));
   expect(payloads.every((payload) => payload.type === "GENERATIVE_UI_RESPONSE" && payload.componentSpec.name === "FloralGreeting")).toBe(true);
 });
+
+test("matching rose artwork moves through bud, opening, and bloom with a 3D arc", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  const bud = page.locator(".rose-phase--bud");
+  const opening = page.locator(".rose-phase--opening");
+  const bloom = page.locator(".rose-phase--bloom");
+  await expect(bud).toHaveJSProperty("naturalWidth", 1024);
+  await expect(bud).toHaveCSS("opacity", "1");
+  await page.getByRole("button", { name: "Mở món quà" }).click();
+  await expect(opening).toHaveCSS("opacity", "1");
+  await page.getByRole("button", { name: "Tiếp tục không cần tên" }).click();
+  await expect(page.locator(".rose-depth")).toHaveCSS("animation-name", "rose-arc");
+  await expect(bloom).toHaveCSS("animation-name", "rose-reveal");
+  await page.getByRole("button", { name: "Mở ngay" }).click();
+  await expect(bloom).toHaveCSS("opacity", "1");
+  await expect(bloom).toHaveJSProperty("naturalWidth", 1024);
+});
