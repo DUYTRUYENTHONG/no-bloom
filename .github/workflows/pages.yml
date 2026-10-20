@@ -24,8 +24,11 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npm test
-      - run: npm run typecheck
+      - run: npm run qa:fast
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm run qa:build
+      - run: npm run qa:journeys
+      - run: npm run qa:a11y
       - run: npm run build
         env:
           GITHUB_PAGES: "true"

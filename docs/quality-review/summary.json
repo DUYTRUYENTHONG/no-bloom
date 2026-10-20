@@ -1,0 +1,93 @@
+{
+  "checkedAt": "2026-10-20T07:30:14.777Z",
+  "sourceFingerprint": "b2642e7ef6d35d6fd3c35d8299b3efd53f040d07b2dd7e764ac0313c53adffd6",
+  "overall": "BLOCKED",
+  "reason": "Performance target remains unmet; feature branch may be reviewed, production readiness is not claimed.",
+  "gates": {
+    "fast": {
+      "checkedAt": "2026-10-20T07:21:24.193Z",
+      "sourceFingerprint": "a53c58fbf4aae547088dd16b9bd5bd12be6a76cbbed314311c38cfa85c4b050d",
+      "status": "PASS"
+    },
+    "build": {
+      "checkedAt": "2026-10-20T07:29:55.449Z",
+      "sourceFingerprint": "b2642e7ef6d35d6fd3c35d8299b3efd53f040d07b2dd7e764ac0313c53adffd6",
+      "status": "PASS"
+    },
+    "journeys": {
+      "checkedAt": "2026-10-20T07:22:09.455Z",
+      "sourceFingerprint": "a53c58fbf4aae547088dd16b9bd5bd12be6a76cbbed314311c38cfa85c4b050d",
+      "status": "PASS"
+    },
+    "a11y": {
+      "checkedAt": "2026-10-20T07:22:26.211Z",
+      "sourceFingerprint": "a53c58fbf4aae547088dd16b9bd5bd12be6a76cbbed314311c38cfa85c4b050d",
+      "status": "PASS"
+    },
+    "visual": {
+      "checkedAt": "2026-10-20T07:22:52.234Z",
+      "sourceFingerprint": "a53c58fbf4aae547088dd16b9bd5bd12be6a76cbbed314311c38cfa85c4b050d",
+      "status": "PASS"
+    },
+    "motion": {
+      "checkedAt": "2026-10-20T07:23:14.436Z",
+      "sourceFingerprint": "a53c58fbf4aae547088dd16b9bd5bd12be6a76cbbed314311c38cfa85c4b050d",
+      "status": "PASS"
+    },
+    "performance": {
+      "checkedAt": "2026-10-20T07:26:05.948Z",
+      "sourceFingerprint": "a53c58fbf4aae547088dd16b9bd5bd12be6a76cbbed314311c38cfa85c4b050d",
+      "status": "FAIL",
+      "error": "Error: QA child exited 1"
+    }
+  },
+  "performance": {
+    "lcpMs": {
+      "median": 5652,
+      "min": 5448,
+      "max": 5964
+    },
+    "cls": {
+      "median": 0.011813586943844996,
+      "min": 0.011813586943844996,
+      "max": 0.011813586943844996
+    },
+    "observedTransferBytes": {
+      "median": 945324,
+      "min": 945324,
+      "max": 945324
+    },
+    "clickToFieldMs": {
+      "median": 596.3508999999976,
+      "min": 301.7723999999871,
+      "max": 1114.3516999999993
+    },
+    "longestTaskMs": {
+      "median": 704,
+      "min": 517,
+      "max": 913
+    }
+  },
+  "independentReview": {
+    "motion": "PASS, no remaining P1; procedural faceting remains",
+    "journey": "No P0/P1; focus and failed-player cleanup P2 findings corrected"
+  },
+  "notRun": [
+    "Connected Supabase/Groq",
+    "Live YouTube audio",
+    "Physical phone and software keyboard",
+    "Lint (no configuration)",
+    "UX catalog Python search (Python absent)"
+  ],
+  "limitations": [
+    "Actor uses rendered sprite poses, not skeletal 3D",
+    "Native hooks pending normal trust review",
+    "Detailed evidence remains local in artifacts/quality/final"
+  ],
+  "exportedServices": {
+    "analytics": "PASS local stub, including consent accessibility/focus",
+    "counter": "PASS local stub",
+    "guide": "PASS isolated guide configuration: request/name isolation and axe"
+  },
+  "evidenceDelta": "After the complete run, only scripts/test-exported-guide.mjs changed to use explicit browser.newContext required by axe. That check and the default static build were rerun successfully. Prior full-run receipts retain their exact earlier fingerprints; application, scene and performance source did not change."
+}

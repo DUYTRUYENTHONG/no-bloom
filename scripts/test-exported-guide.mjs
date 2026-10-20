@@ -3,6 +3,7 @@ import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { resolve, join, extname } from "node:path";
 import { chromium } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
 
 const root = resolve("out");
 const requests = [];
@@ -29,12 +30,15 @@ const site = createServer(async (request, response) => {
 await Promise.all([new Promise((done) => api.listen(3208, "127.0.0.1", done)), new Promise((done) => site.listen(3206, "127.0.0.1", done))]);
 const browser = await chromium.launch({ channel: "chrome", headless: true });
 try {
-  const page = await browser.newPage({ reducedMotion: "reduce" });
+  const context = await browser.newContext({ reducedMotion: "reduce" });
+  const page = await context.newPage();
   await page.goto("http://127.0.0.1:3206/no-bloom/?for=L%C3%AA+Th%E1%BB%8B+Mai");
   await page.getByRole("heading", { name: /Lê Thị Mai, chúc bạn/ }).waitFor();
   await page.getByRole("button", { name: "Mở bạn đồng hành" }).click();
   await page.getByRole("button", { name: "Cách tạo liên kết riêng?" }).click();
   await page.getByText("AI test answer").waitFor();
+  const scan = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
+  assert.deepEqual(scan.violations.map((entry) => entry.id), [], "configured guide form accessibility");
   assert.deepEqual(requests, [{ question: "Cách tạo liên kết riêng?", locale: "vi", stage: "greeting" }]);
   assert.equal(JSON.stringify(requests).includes("Mai"), false);
   console.log("Exported guide request and name isolation passed against a local Groq-function stub.");

@@ -7,3 +7,6 @@ out/
 playwright-report/
 test-results/
 supabase/functions/.env
+.qa-cache/
+.qa-lock
+artifacts/quality/

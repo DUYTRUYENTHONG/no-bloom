@@ -3,6 +3,7 @@ import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { resolve, extname, join } from "node:path";
 import { chromium } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
 
 const root = resolve("out");
 const events = [];
@@ -48,7 +49,16 @@ try {
   await page.goto("http://127.0.0.1:3202/no-bloom/");
   await page.getByRole("button", { name: "Đồng ý" }).waitFor();
   assert.equal(events.length, 0, "no event before affirmative consent");
+  const accessibility = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
+  assert.deepEqual(accessibility.violations.map((entry) => entry.id), [], "optional preference accessibility");
+  await page.getByRole("button", { name: "Quyền riêng tư" }).click();
+  await page.getByRole("button", { name: "Quyền riêng tư" }).click();
+  await page.getByRole("button", { name: "Mở món quà" }).focus();
+  await page.keyboard.press("Escape");
+  assert.equal(await page.getByRole("button", { name: "Quyền riêng tư" }).evaluate((element) => element === document.activeElement), true);
+  await page.getByRole("button", { name: "Quyền riêng tư" }).click();
   await page.getByRole("button", { name: "Đồng ý" }).click();
+  assert.equal(await page.getByRole("button", { name: "Quyền riêng tư" }).evaluate((element) => element === document.activeElement), true);
   await page.waitForFunction(() => window.localStorage.getItem("no-bloom:analytics-visitor") !== null);
   await waitForEvents(1);
   assert.deepEqual(Object.keys(events[0]).sort(), ["event_id", "occurred_at", "page_key", "source_category", "visitor_id"]);
