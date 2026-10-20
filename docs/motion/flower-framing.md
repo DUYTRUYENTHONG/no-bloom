@@ -1,5 +1,7 @@
 # Flower viewport correction
 
+Current media supersedes the historical fallback/WebGL details below: five real photographs and two recorded bloom clips now use this bounded frame. The caption and static-mode control have been removed. See photographic-flowers.md for exact coverage and rights.
+
 The reported 665×604 viewport had a 596.5×298 fallback container but a 596.5×894.75 image box. Grid intrinsic minimum sizing let the portrait image overflow even with object-fit:contain. This was a layout defect, not a cropped source asset.
 
 Changes:
@@ -14,4 +16,4 @@ The same reserved frame is used for bud, WebGL, static/open and loading states. 
 
 Read-only senior product designer review supplied framing recommendations. Fourteen Chromium/WebKit checks capture both invitation buds and completed static flowers at1440×900,1024×768,768×1024,665×604,390×844,320×568 and844×390. Assertions check the image box against frame bounds, contain/no-mask behavior and horizontal overflow. Evidence: artifacts/quality/flower-framing/. These automated bounds checks supplement visual review; they do not alone establish visual quality or real-device behavior.
 
-The purple gift-box attachment is a reference, not a licensed production asset. No watermarked stock image is copied into the site. A requested interaction choice is pending before changing the primary action.
+The purple gift-box attachment is a reference, not a licensed production asset. No watermarked stock image is copied into the site. The owner subsequently chose a clickable purple gift with an opening animation; the original CSS implementation preserves the labeled native action.

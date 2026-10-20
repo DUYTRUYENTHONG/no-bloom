@@ -14,14 +14,14 @@ const guidance = {
     title: "Bạn đồng hành NỞ", open: "Mở bạn đồng hành", close: "Đóng bạn đồng hành", send: "Gửi", placeholder: "Hỏi về món quà…", waiting: "Đang nghĩ…",
     intro: "Mình ở đây để giúp bạn khám phá món quà.", offline: "Trò chuyện AI đang chưa sẵn sàng. Mình vẫn có thể chỉ bạn cách dùng món quà.", disclosure: "Khi gửi, nội dung câu hỏi được xử lý qua Groq. Đừng nhập thông tin riêng tư.",
     prompts: ["Cách tạo liên kết riêng?", "Làm sao chọn hoa?", "Có thể bỏ qua hiệu ứng?"],
-    answers: ["Nhập tên, mở lời chúc rồi chọn “Sao chép liên kết riêng”. Người nhận mở liên kết sẽ không cần nhập tên.", "Chọn loài hoa ở bước nhập tên trước khi bắt đầu nở.", "Có. Chọn “Mở ngay” trong lúc hoa nở hoặc “Xem hoa tĩnh” dưới khung hoa."],
+    answers: ["Nhập tên, mở lời chúc rồi chọn “Sao chép liên kết riêng”. Người nhận mở liên kết sẽ không cần nhập tên.", "Chọn loài hoa ở bước nhập tên trước khi bắt đầu nở.", "Có. Chọn “Mở ngay” trong lúc hoa nở; hoặc bật chế độ giảm chuyển động trên thiết bị."],
     stage: { invitation: "Bắt đầu bằng “Mở món quà” nhé.", personalization: "Bạn có thể chọn hoa và nhập tên, hoặc tiếp tục không cần tên.", blooming: "Hoa đang nở. Bạn có thể chọn “Mở ngay”.", greeting: "Lời chúc đã sẵn sàng. Bạn có thể sao chép liên kết riêng hoặc xem hoa nở lại.", withering: "Một đóa hoa mới đang được chuẩn bị." },
   },
   en: {
     title: "NỞ companion", open: "Open companion", close: "Close companion", send: "Send", placeholder: "Ask about the gift…", waiting: "Thinking…",
     intro: "I can help you explore this gift.", offline: "AI chat is not available yet. I can still explain how to use the gift.", disclosure: "Questions you send are processed by Groq. Please avoid private information.",
     prompts: ["How do I make a personal link?", "How can I choose a flower?", "Can I skip the animation?"],
-    answers: ["Enter a name, open the greeting, then choose “Copy personal link”. The recipient will not need to enter a name.", "Choose a flower at the name-entry step before starting the bloom.", "Yes. Choose “Show me now” during the bloom or “View still flower” below it."],
+    answers: ["Enter a name, open the greeting, then choose “Copy personal link”. The recipient will not need to enter a name.", "Choose a flower at the name-entry step before starting the bloom.", "Yes. Choose “Show me now” during the bloom; or enable reduced motion on your device."],
     stage: { invitation: "Start with “Open your gift”.", personalization: "Choose a flower and enter a name, or continue without one.", blooming: "The flowers are opening. You can choose “Show me now”.", greeting: "Your greeting is ready. Copy the personal link or replay the bloom.", withering: "A new flower is being prepared." },
   },
 } as const;

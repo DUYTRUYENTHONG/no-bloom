@@ -1,0 +1,61 @@
+.celebration {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  width: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.content {
+  position: relative;
+  z-index: 2;
+  animation: letter-pop-in 760ms cubic-bezier(.2, .82, .28, 1) both;
+}
+
+.particles {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  top: -12px;
+  left: var(--particle-x);
+  width: var(--particle-size);
+  height: calc(var(--particle-size) * 1.45);
+  border-radius: 2px;
+  background: var(--particle-color);
+  opacity: 0;
+  animation: confetti-fall var(--particle-duration) cubic-bezier(.18, .66, .35, 1) var(--particle-delay) both;
+}
+
+.particle:nth-child(3n) {
+  border-radius: 50%;
+  height: var(--particle-size);
+}
+
+.particle:nth-child(4n) {
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+@keyframes letter-pop-in {
+  0% { opacity: 0; transform: translateY(18px) scale(.92); }
+  62% { opacity: 1; transform: translateY(-3px) scale(1.015); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes confetti-fall {
+  0% { top: -12px; opacity: 0; transform: translate3d(0, -8px, 0) rotate(0); }
+  12% { opacity: .95; }
+  78% { opacity: .9; }
+  100% { top: calc(100% + 12px); opacity: 0; transform: translate3d(var(--particle-drift), 8px, 0) rotate(var(--particle-turn)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .content { animation: none; }
+  .particles { display: none; }
+}

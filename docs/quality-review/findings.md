@@ -21,3 +21,15 @@
 | CLOUD-001 | No Supabase project or Groq key configured | Integration verification | Local SQL/handler/stub tests only; no production mutations | BLOCKED cloud verification |
 
 Evidence: baseline commit `3f6c096`, `artifacts/quality/baseline/`, independent journey/motion reviewer reports, `tests/browser/quality.spec.ts`, `scripts/qa-motion.mjs`. Final statuses and fingerprint are in `summary.json` after verification. This register does not turn a missing or old check into PASS.
+
+## Current follow-up findings
+
+| ID | Finding | Correction and evidence |
+|---|---|---|
+| UX-006 | Mobile actor remained oversized and covered content at491px | 56px scroll-away dock through800px; portrait/landscape interaction and geometry tests |
+| UX-007 | Same greeting on each entry | Eight bilingual variants; immediate repeat excluded; replay/share consistency tests |
+| UX-008 | Selected compliment lacked celebration | Actual letter pop-in +42 finite edge particles; no text overlap, no focus stealing, reduced-motion bypass |
+| MEDIA-001 | Rejected procedural flowers were unrealistic | Real species-checked local images; no procedural recipient fallback |
+| MEDIA-002 | Still photo tilt/zoom was not blooming | Real recorded opening for orchid and Alstroemeria; other five explicitly flagged as missing, per owner choice |
+| MEDIA-003 | Media failures could hide greeting | Image decode failure and actual missing-video URL preserve named greeting |
+| UX-009 | Source/counter/static controls requested removed | Removed from recipient DOM; separate /credits/ retains rights information |

@@ -1,0 +1,1 @@
+.frame{position:absolute;inset:0;min-width:0;min-height:0;overflow:hidden}.image,.video{position:absolute;inset:12px;width:calc(100% - 24px);height:calc(100% - 24px);object-fit:contain}.video{pointer-events:none}.status{position:absolute;bottom:12px;left:12px;right:12px;padding:10px;background:#08130eef;color:#f5f2e5;font-size:14px}

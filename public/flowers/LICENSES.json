@@ -1,0 +1,146 @@
+{
+  "retrieved": "2026-10-20",
+  "notice": "Each photograph remains under its listed license; CC BY-SA adapted image files retain their original share-alike terms. No photographer endorses this website.",
+  "assets": [
+    {
+      "kind": "rose",
+      "src": "flowers/rose.webp",
+      "scientific": "Rosa · garden hybrid",
+      "author": "TriviaKing / DWS-Montag Zen",
+      "source": "https://commons.wikimedia.org/wiki/File:Closeup_of_a_pink_rose_in_full_bloom..JPG",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+      "changes": "Resized without cropping; converted to WebP. UI adds a perspective reveal. Not a time-lapse or a reconstructed 3D flower.",
+      "sha256": "9222a68c6d9f966f478fa2e9f2c74208509c906f9cb65f14f9066a9469cce4c5",
+      "bytes": 64452
+    },
+    {
+      "kind": "peach-rose",
+      "src": "flowers/peach-rose.webp",
+      "scientific": "Rosa · apricot cultivar",
+      "author": "Rosendahl",
+      "source": "https://commons.wikimedia.org/wiki/File:Apricot_colored_rose_closeup.jpg",
+      "license": "Public domain",
+      "licenseUrl": "https://commons.wikimedia.org/wiki/File:Apricot_colored_rose_closeup.jpg#Licensing",
+      "changes": "Resized without cropping; converted to WebP. UI adds a perspective reveal. Not a time-lapse or a reconstructed 3D flower.",
+      "sha256": "9a97b59d3749668d7fe5a43d38c33339d29474d43d796200bc5b4ece7eff4615",
+      "bytes": 51086
+    },
+    {
+      "kind": "peony",
+      "src": "flowers/peony.webp",
+      "scientific": "Paeonia",
+      "author": "Nathanieljoyce",
+      "source": "https://commons.wikimedia.org/wiki/File:Pink_Peony_Flower.jpg",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "changes": "Resized without cropping; converted to WebP. UI adds a perspective reveal. Not a time-lapse or a reconstructed 3D flower.",
+      "sha256": "01921035cb092ba85aac5ce70c08980e22f3f0fcd5fc98601d394cb9b083879f",
+      "bytes": 71630
+    },
+    {
+      "kind": "cherry",
+      "src": "flowers/cherry.webp",
+      "scientific": "Prunus ‘Kanzan’",
+      "author": "Marie-Lan Nguyen",
+      "source": "https://commons.wikimedia.org/wiki/File:Prunus_serrulata_Kanzan_blossom_Jardin_des_Plantes_2013-04-21.jpg",
+      "license": "CC BY 2.5",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.5/",
+      "changes": "Resized without cropping; converted to WebP. UI adds a perspective reveal. Not a time-lapse or a reconstructed 3D flower.",
+      "sha256": "de4bbfbfc22491f8ccff0ddc842175e242b83c24a1e869aa29edb303a3036b1d",
+      "bytes": 79640
+    },
+    {
+      "kind": "lily",
+      "src": "flowers/lily.webp",
+      "scientific": "Lilium · Oriental hybrid ‘Marlon’",
+      "author": "George E. Koronaios",
+      "source": "https://commons.wikimedia.org/wiki/File:Pink_Lilium_Oriental_Marlon_flower.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "changes": "Resized without cropping; converted to WebP. UI adds a perspective reveal. Not a time-lapse or a reconstructed 3D flower.",
+      "sha256": "0e85fec0edf7be7fc921a250dead45adc84cd4023c0ac4b09f76e7845d1cb8f7",
+      "bytes": 51928
+    },
+    {
+      "kind": "alstroemeria",
+      "src": "flowers/alstroemeria.webp",
+      "scientific": "Alstroemeria · garden cultivar",
+      "author": "LadyRabbit",
+      "source": "https://commons.wikimedia.org/wiki/File:Pink_Alstromeria_flower.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "changes": "Resized without cropping; converted to WebP. UI adds a perspective reveal. Not a time-lapse or a reconstructed 3D flower.",
+      "sha256": "7d50e65c6169b840f4f1dad5d837f4edd209d1a75588dc0a43ca5405de7e74e2",
+      "bytes": 135018
+    },
+    {
+      "kind": "orchid",
+      "src": "flowers/orchid.webp",
+      "scientific": "Phalaenopsis · hybrid",
+      "author": "Kev22",
+      "source": "https://commons.wikimedia.org/wiki/File:Phalaenopsis_pink_-_Orchidée_02.jpg",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "changes": "Resized without cropping; converted to WebP. UI adds a perspective reveal. Not a time-lapse or a reconstructed 3D flower.",
+      "sha256": "9aa7e2460c796706b7cd52503be7df8cdaec5264339ec66e6e5e1f15fbfa4194",
+      "bytes": 53342
+    }
+  ],
+  "recordedBlooms": [
+    {
+      "kind": "alstroemeria",
+      "author": "苏 醒",
+      "source": "https://www.pexels.com/video/timelapse-of-alstroemeria-flower-blooming-in-darkness-29968086/",
+      "download": "https://videos.pexels.com/video-files/29968086/12860602_3840_2160_25fps.mp4",
+      "clipSeconds": 32,
+      "license": "Pexels License",
+      "licenseUrl": "https://www.pexels.com/license/",
+      "changes": "Opening sequence shortened to approximately seven seconds, resized to 960px wide, muted and H.264 compressed; bud and final posters extracted. No AI-generated petals.",
+      "files": [
+        {
+          "path": "public/flowers/alstroemeria-bloom.mp4",
+          "bytes": 355801,
+          "sha256": "b447c3f4c3540ec18956555d7f0399b971924bb6f08679280f4170181801da1f"
+        },
+        {
+          "path": "public/flowers/alstroemeria-bud.webp",
+          "bytes": 7586,
+          "sha256": "f2dd2663b12fb006e563202ab8c12db0dadc61421d2c3dbadad8b4cd60296604"
+        },
+        {
+          "path": "public/flowers/alstroemeria-open.webp",
+          "bytes": 11074,
+          "sha256": "73dd05243bf22a21b1a6e375753258341aef1b09e4f1c45eb09a6628e086ab94"
+        }
+      ]
+    },
+    {
+      "kind": "orchid",
+      "author": "Eric Versaw",
+      "source": "https://www.pexels.com/video/time-lapse-video-of-an-orchid-blooming-4010613/",
+      "download": "https://videos.pexels.com/video-files/4010613/4010613-hd_1920_1080_24fps.mp4",
+      "clipSeconds": 12.14,
+      "license": "Pexels License",
+      "licenseUrl": "https://www.pexels.com/license/",
+      "changes": "Opening sequence shortened to approximately seven seconds, resized to 960px wide, muted and H.264 compressed; bud and final posters extracted. No AI-generated petals.",
+      "files": [
+        {
+          "path": "public/flowers/orchid-bloom.mp4",
+          "bytes": 714347,
+          "sha256": "4675b960f675423746b654499f7a89339c6a7a2c84572359a9ea8922b0e82457"
+        },
+        {
+          "path": "public/flowers/orchid-bud.webp",
+          "bytes": 8508,
+          "sha256": "b4ba817337d22f9f7228b647a8ef35b239528d580c4cd3ac261940cc0e0943cd"
+        },
+        {
+          "path": "public/flowers/orchid-open.webp",
+          "bytes": 15082,
+          "sha256": "3ec0bb7e1414fc33e38b9a4972011dbe1f14439aa89277ec7f62fcbec7091006"
+        }
+      ]
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-import { chromium, webkit } from "@playwright/test";
+import { chromium } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { mkdir, readFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
@@ -27,6 +27,16 @@ async function audit(page, name) {
   const scan = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
   results.push({ state: name, violations: scan.violations.map(({ id, impact, nodes }) => ({ id, impact, nodes: nodes.map((node) => ({ target: node.target, summary: node.failureSummary })) })) });
 }
+async function waitForPhoto(page) {
+  const renderer = page.locator("[data-rose-renderer=photograph]");
+  await renderer.waitFor();
+  const image = renderer.locator(".photo-bloom-image");
+  await image.waitFor();
+  await image.evaluate((element) => element.decode());
+  const pathname = await image.evaluate((element) => new URL(element.currentSrc || element.src).pathname);
+  if (!/^\/no-bloom\/flowers\/[a-z-]+\.webp$|^\/flowers\/[a-z-]+\.webp$/.test(pathname)) throw new Error(`Unexpected flower photo source: ${pathname}`);
+  if (await page.locator("canvas").count()) throw new Error("Recipient route created a canvas");
+}
 try {
   const context = await browser.newContext({ reducedMotion: "reduce", viewport: { width: 390, height: 844 } });
   const page = await context.newPage();
@@ -36,6 +46,7 @@ try {
     for (const locale of ["vi", "en"]) {
       await page.goto(site.url);
       await page.getByRole("button", { name: "Mở món quà" }).waitFor();
+      await waitForPhoto(page);
       if (locale === "en") await page.getByRole("combobox").selectOption("en");
       await audit(page, `${locale}-invitation`);
       await page.getByRole("button", { name: locale === "vi" ? "Mở món quà" : "Open your gift" }).click();
@@ -55,6 +66,7 @@ try {
       await page.setViewportSize({ width, height });
       await page.goto(site.url);
       await page.getByRole("button", { name: "Mở món quà" }).waitFor();
+      await waitForPhoto(page);
       await capture(page, `${width}-${height}-invitation`);
       await page.getByRole("button", { name: "Mở món quà" }).click();
       await capture(page, `${width}-${height}-name`);
@@ -73,15 +85,19 @@ try {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.goto("http://localhost:3100/?bloomDebug=1");
-    const slider = page.locator(".rose-inspector input[type=range]");
+    await waitForPhoto(page);
+    const inspector = page.locator(".photo-inspector");
+    const slider = inspector.locator("input[type=range]");
     await slider.waitFor();
+    await slider.fill("0.01");
     for (const progress of ["0", "0.25", "0.5", "0.75", "1"]) {
       await slider.fill(progress);
-      await page.locator("canvas").waitFor();
       await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
-      await page.locator(".rose-inspector").evaluate((element) => { element.style.visibility = "hidden"; });
-      await capture(page, `rose-pose-${progress}`, page.locator(".flower-frame"));
-      await page.locator(".rose-inspector").evaluate((element) => { element.style.visibility = ""; });
+      const actual = Number(await page.locator("[data-photo-progress]").first().getAttribute("data-photo-progress"));
+      if (Math.abs(actual - Number(progress)) > 0.01) throw new Error(`Photo checkpoint ${progress} reported ${actual}`);
+      await inspector.evaluate((element) => { element.style.visibility = "hidden"; });
+      await capture(page, `photo-reveal-${progress}`, page.locator(".flower-frame"));
+      await inspector.evaluate((element) => { element.style.visibility = ""; });
     }
   }
   const report = { sourceFingerprint: await fingerprint(), checkedAt: new Date().toISOString(), browser: browser.version(), mode, results, errors, artifacts };

@@ -32,23 +32,34 @@ test("clipboard rejection offers a usable personal link", async ({ page }) => {
   await page.addInitScript(() => { Object.defineProperty(navigator, "clipboard", { value: { writeText: () => Promise.reject(new Error("Denied")) } }); });
   await page.goto("/?for=An&flower=peony&utm_source=facebook");
   await page.getByRole("button", { name: "Sao chép liên kết riêng" }).click();
-  await expect(page.getByLabel("Chọn và sao chép liên kết này")).toHaveValue(/\?for=An&flower=peony$/);
+  const fallback = page.getByLabel("Chọn và sao chép liên kết này");
+  const complimentId = await page.locator(".letter").getAttribute("data-compliment-id");
+  expect(complimentId).not.toBeNull();
+  const link = new URL(await fallback.inputValue(), page.url());
+  expect([...link.searchParams.keys()].sort()).toEqual(["flower", "for", "wish"]);
+  expect(link.searchParams.get("for")).toBe("An");
+  expect(link.searchParams.get("flower")).toBe("peony");
+  expect(link.searchParams.get("wish")).toBe(complimentId);
   await expect(page.getByRole("status")).toContainText("Không thể sao chép");
-  await expect(page.getByLabel("Chọn và sao chép liên kết này")).toBeFocused();
+  await expect(fallback).toBeFocused();
 });
 
-test("reduced motion and manual static mode allocate no WebGL canvas", async ({ page }) => {
+test("reduced motion bypasses photo motion automatically and recipient routes allocate no canvas", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/?for=An");
   await expect(page.locator(".greeting-content")).toBeVisible();
   await expect(page.locator("canvas")).toHaveCount(0);
-  await expect(page.locator("[data-rose-renderer=static]")).toBeVisible();
+  await expect(page.locator("[data-rose-renderer=photograph]")).toBeVisible();
+  await expect(page.locator(".photo-bloom-image")).toBeVisible();
+  await expect(page.locator(".mode-button")).toHaveCount(0);
+  expect(await page.locator(".photo-motion").evaluate((element) => element.getAnimations().filter((animation) => animation.playState === "running" || animation.pending).length)).toBe(0);
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/");
-  await page.getByRole("button", { name: "Xem hoa tĩnh" }).click();
   await page.getByRole("button", { name: "Mở món quà" }).click();
-  await expect(page.locator("canvas")).toHaveCount(0);
   await page.getByRole("button", { name: "Tiếp tục không cần tên" }).click();
+  await expect(page.locator("[data-rose-renderer=photograph]")).toBeVisible();
+  await expect(page.locator("canvas")).toHaveCount(0);
+  await page.getByRole("button", { name: "Mở ngay" }).click();
   await expect(page.locator(".greeting-content")).toBeVisible();
 });
 

@@ -11,6 +11,9 @@ import { flowerCatalog, flowerKinds, type FlowerKind } from "@/lib/flower-catalo
 import { VisitorCounter } from "./VisitorCounter";
 import { readGiftLink } from "@/lib/gift-link";
 import { FlowerGuide } from "./FlowerGuide";
+import { GiftBoxButton } from "./GiftBoxButton";
+import { chooseCompliment, type ComplimentId } from "@/lib/compliments";
+import { flowerPhotos } from "@/lib/flower-photos";
 
 type Stage = "invitation" | "personalization" | "blooming" | "greeting" | "withering";
 
@@ -19,8 +22,8 @@ export function Experience() {
   const [stage, setStage] = useState<Stage>("invitation");
   const [input, setInput] = useState("");
   const [name, setName] = useState<string | null>(null);
+  const [complimentId, setComplimentId] = useState<ComplimentId>("joy");
   const [nameIssue, setNameIssue] = useState<"required" | "long" | null>(null);
-  const [staticMode, setStaticMode] = useState(false);
   const [flower, setFlower] = useState<FlowerKind>("rose");
   const [reducedMotion, setReducedMotion] = useState(false);
   const [paused, setPaused] = useState(false);
@@ -32,21 +35,22 @@ export function Experience() {
   const error = nameIssue === "required" ? t.nameError : nameIssue === "long" ? t.nameLong : "";
   useEffect(() => { document.documentElement.lang = locale; }, [locale]);
   const botanicalState: BotanicalState = error ? "WITHER_RELOAD" : stage === "invitation" ? "BUD" : stage === "personalization" ? "SPROUT" : stage === "blooming" ? "BLOOMING" : stage === "withering" ? "WITHER_RELOAD" : "FULL_BLOOM";
-  const payload = createBotanicalResponse(botanicalState, locale, name, flower);
+  const payload = createBotanicalResponse(botanicalState, locale, name, flower, complimentId);
 
   useEffect(() => {
     window.dispatchEvent(new CustomEvent("no-bloom:a2ui", { detail: payload }));
-  }, [payload.botanicalState, payload.componentSpec.props.data.locale, payload.componentSpec.props.data.recipient, payload.componentSpec.props.data.flower, staticMode, reducedMotion]);
+  }, [payload.botanicalState, payload.componentSpec.props.data.locale, payload.componentSpec.props.data.recipient, payload.componentSpec.props.data.flower, reducedMotion, complimentId]);
 
   useEffect(() => {
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const update = () => { setReducedMotion(query.matches); if (query.matches) setStaticMode(true); };
+    const update = () => setReducedMotion(query.matches);
     update(); query.addEventListener("change", update);
     const linked = readGiftLink(new URL(window.location.href));
     if (linked) {
       setInput(linked.name);
       setName(linked.name);
       setFlower(linked.flower);
+      setComplimentId(linked.complimentId ?? chooseCompliment());
       setStage("blooming");
     } else {
       try { const saved = sessionStorage.getItem("no-bloom-name"); if (saved) setInput(saved); } catch { /* storage unavailable */ }
@@ -63,8 +67,9 @@ export function Experience() {
     setStage("greeting");
   }, []);
 
-  function startBloom(selectedName: string | null) {
-    window.scrollTo({ top: 0, behavior: staticMode || reducedMotion ? "instant" : "smooth" });
+  function startBloom(selectedName: string | null, newGreeting = true) {
+    if (newGreeting) setComplimentId(previous => chooseCompliment(previous));
+    window.scrollTo({ top: 0, behavior: reducedMotion ? "instant" : "smooth" });
     setName(selectedName);
     setNameIssue(null);
     setPaused(false);
@@ -81,24 +86,24 @@ export function Experience() {
 
   function replay() { beginWither("replay"); }
   function beginWither(action: "replay" | "restart") {
-    window.scrollTo({ top: 0, behavior: staticMode || reducedMotion ? "instant" : "smooth" });
+    window.scrollTo({ top: 0, behavior: reducedMotion ? "instant" : "smooth" });
     pendingAction.current = action;
     setStage("withering");
   }
   function finishWither() {
     const action = pendingAction.current;
     pendingAction.current = null;
-    if (action === "replay") startBloom(name);
+    if (action === "replay") startBloom(name, false);
     else if (action === "restart") clearName();
   }
   function clearName() {
     setInput(""); setName(null); setNameIssue(null); setStage("personalization");
     try { sessionStorage.removeItem("no-bloom-name"); } catch { /* storage unavailable */ }
     const url = new URL(window.location.href);
-    if (url.searchParams.has("for")) { url.searchParams.delete("for"); url.searchParams.delete("flower"); window.history.replaceState(null, "", url); }
+    if (url.searchParams.has("for")) { url.searchParams.delete("for"); url.searchParams.delete("flower"); url.searchParams.delete("wish"); window.history.replaceState(null, "", url); }
   }
 
-  const showStatic = staticMode || reducedMotion;
+  const showStatic = reducedMotion;
 
   return <main className={`experience stage-${stage}`} data-botanical-state={botanicalState} data-ui-component={payload.componentSpec.name}>
     <div className="page-wash" aria-hidden="true" />
@@ -117,13 +122,13 @@ export function Experience() {
           <p className="overline">A FLOWER, JUST FOR YOU</p>
           <h1>{locale === "vi" ? <>Có một điều <em>dịu dàng</em> đang chờ bạn.</> : <>Something <em>gentle</em> is waiting for you.</>}</h1>
           <p className="supporting">{t.intro}</p>
-          <button className="primary-button" onClick={() => setStage("personalization")}>{t.open}<span aria-hidden="true">↗</span></button>
+          <GiftBoxButton label={t.open} onOpen={() => setStage("personalization")} />
         </div>}
         {stage === "personalization" && <div className="story-content">
           <p className="overline">A FLOWER, JUST FOR YOU</p>
           <h1>{t.nameQuestion}</h1>
           <p className="supporting">{t.nameHelp}</p>
-          <div className="flower-choice"><label htmlFor="flower-kind">{locale === "vi" ? "Chọn loài hoa của bạn" : "Choose your flower"}</label><select id="flower-kind" value={flower} onChange={(event) => setFlower(event.target.value as FlowerKind)}>{flowerKinds.map((kind) => <option key={kind} value={kind}>{flowerCatalog[kind][locale]}</option>)}</select></div>
+          <div className="flower-choice"><label htmlFor="flower-kind">{locale === "vi" ? "Chọn loài hoa của bạn" : "Choose your flower"}</label><select id="flower-kind" value={flower} onChange={(event) => setFlower(event.target.value as FlowerKind)}>{flowerKinds.map((kind) => <option key={kind} value={kind}>{flowerCatalog[kind][locale]}</option>)}</select><p className="flower-identification">{flowerPhotos[flower].scientific}</p></div>
           <form onSubmit={submitName} noValidate>
             <label htmlFor="preferred-name" className="input-label">{t.namePlaceholder}</label>
             <input id="preferred-name" value={input} onChange={(event) => { setInput(event.target.value); setNameIssue(null); }} placeholder={t.namePlaceholder} autoComplete="name" aria-invalid={Boolean(error)} aria-describedby={error ? "name-error" : undefined} autoFocus />
@@ -147,10 +152,8 @@ export function Experience() {
       <section className="flower-panel" aria-label={locale === "vi" ? flowerCatalog[flower].descriptionVi : flowerCatalog[flower].descriptionEn}>
         <div className="flower-halo" aria-hidden="true" />
         <div className="flower-frame">
-          <RoseBloom stage={stage} kind={flower} locale={locale} paused={paused} motionEnabled={!showStatic} onComplete={finish} onClosed={finishWither} onUnavailable={markSceneUnavailable} />
+          <RoseBloom key={flower} stage={stage} kind={flower} locale={locale} paused={paused} motionEnabled={!showStatic} onComplete={finish} onClosed={finishWither} onUnavailable={markSceneUnavailable} />
         </div>
-        <div className="flower-caption"><span className="caption-line" /><span>{String(flowerKinds.indexOf(flower) + 1).padStart(2, "0")} / {String(flowerKinds.length).padStart(2, "0")}</span><span className="caption-name">{flowerCatalog[flower].caption}</span></div>
-        <button className="mode-button" onClick={() => setStaticMode((value) => !value)} disabled={reducedMotion || sceneUnavailable} aria-label={sceneUnavailable ? t.sceneUnavailable : showStatic ? t.animated : t.static}>{sceneUnavailable ? t.sceneUnavailable : showStatic ? t.animated : t.static}</button>
         {reducedMotion && <p className="mode-note">{t.reduced}</p>}
         <VisitorCounter locale={locale} />
       </section>

@@ -9,7 +9,7 @@ const tasks = {
   journeys: [["npm", "run", "test:e2e"]],
   a11y: [["node", "scripts/qa-browser.mjs", "a11y"]],
   visual: [["node", "scripts/qa-browser.mjs", "visual"]],
-  motion: [["node", "scripts/qa-motion.mjs"]],
+  motion: [["node", "scripts/qa-motion.mjs"], ["node", "scripts/qa-exported-blooms.mjs"]],
   performance: [["node", "scripts/qa-performance.mjs", "final"]],
 };
 const target = process.argv[2];

@@ -1,4 +1,6 @@
-# Procedural rose bloom
+# Historical procedural rose bloom
+
+> Retired from the recipient experience on 20 October 2026 at the owner’s request. Current rendering uses licensed photography; see [photographic presentation](motion/photographic-flowers.md). This document describes retained historical source, not the current UI.
 
 The animated artwork uses one React Three Fiber canvas and two independent `RoseRig` instances. There is no external 3D model. Each rose has layered curved petal meshes: 35 on the primary and 29 on the secondary. The existing `rose-bud.webp` and `rose-bloom.webp` files are original project artwork and appear only in the static or WebGL-failure path.
 

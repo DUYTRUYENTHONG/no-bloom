@@ -1,6 +1,7 @@
 import type { GenerativeUiResponse } from "./botanical-schema";
 export type { GenerativeUiResponse } from "./botanical-schema";
 import { copy, type Locale } from "./content";
+import { compliments, type ComplimentId } from "./compliments";
 import { flowerCatalog, type FlowerKind } from "./flower-catalog";
 
 export const botanicalStates = ["BUD", "SPROUT", "BLOOMING", "FULL_BLOOM", "WITHER_RELOAD"] as const;
@@ -16,7 +17,7 @@ const timing: Record<BotanicalState, { growthRate: number; transitionDurationMs:
   WITHER_RELOAD: { growthRate: 0, transitionDurationMs: 450 },
 };
 
-export function createBotanicalResponse(state: BotanicalState, locale: Locale, recipient: string | null, flower: FlowerKind = "rose"): GenerativeUiResponse {
+export function createBotanicalResponse(state: BotanicalState, locale: Locale, recipient: string | null, flower: FlowerKind = "rose", complimentId: ComplimentId = "joy"): GenerativeUiResponse {
   const message = recipient ? copy[locale].namedHeading(recipient) : copy[locale].genericHeading;
   return {
     type: "GENERATIVE_UI_RESPONSE",
@@ -31,7 +32,7 @@ export function createBotanicalResponse(state: BotanicalState, locale: Locale, r
       name: "FloralGreeting",
       props: {
         title: message,
-        data: { locale, recipient, message, flower },
+        data: { locale, recipient, message, flower, compliment: { id: complimentId, ...compliments[complimentId][locale] } },
         interactive: state === "FULL_BLOOM",
       },
     },

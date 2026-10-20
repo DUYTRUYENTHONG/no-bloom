@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { complimentIds } from "./compliments";
 import { botanicalStates, componentCatalog } from "./botanical-ui";
 
 // Validation for external A2UI consumers and contract tests. Internal rendering
@@ -14,7 +15,7 @@ export const generativeUiResponseSchema = z.strictObject({
     name: z.enum(componentCatalog),
     props: z.strictObject({
       title: z.string().min(1),
-      data: z.strictObject({ locale: z.enum(["vi", "en"]), recipient: z.string().nullable(), message: z.string().min(1), flower: z.enum(["rose", "peach-rose", "peony", "cherry", "lily", "alstroemeria", "orchid"]) }),
+      data: z.strictObject({ locale: z.enum(["vi", "en"]), recipient: z.string().nullable(), message: z.string().min(1), flower: z.enum(["rose", "peach-rose", "peony", "cherry", "lily", "alstroemeria", "orchid"]), compliment: z.strictObject({id: z.enum(complimentIds), body: z.string().min(1), signoff: z.string().min(1)}) }),
       interactive: z.boolean(),
     }),
   }),

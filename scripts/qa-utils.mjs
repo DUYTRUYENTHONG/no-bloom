@@ -29,7 +29,7 @@ export async function requireCurrentExport(label) {
 }
 export async function staticSite() {
   const directory = join(root, "out");
-  const mime = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".webp": "image/webp", ".svg": "image/svg+xml", ".woff2": "font/woff2" };
+  const mime = { ".mp4": "video/mp4", ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".webp": "image/webp", ".svg": "image/svg+xml", ".woff2": "font/woff2" };
   const server = createServer(async (request, response) => {
     const pathname = new URL(request.url, "http://localhost").pathname;
     const path = decodeURIComponent(pathname.replace(/^\/no-bloom\/?/, "")) || "index.html";

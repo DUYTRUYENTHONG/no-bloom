@@ -50,3 +50,16 @@ Optional exported-service checks also passed against local stubs: analytics (con
 ## Actor entrance and framing follow-up
 
 Added a finite four-second 2.5D entrance, skip/reduced-motion/interrupt behavior, and the executed brief in docs/motion/actor-introduction.md. Corrected intrinsic grid image overflow and adopted a taller, width-bounded floral stage; docs/motion/flower-framing.md records the measured defect and designer acceptance. Final build,56 Chromium/WebKit journeys,axe scan,27 visual captures and motion checks pass.34 additional intro/framing checkpoint captures have hashed dimensions in the local interaction manifest. Final3-run lab LCP median5,192ms (5,188–5,192),CLS .01015,transfer median949,935B: the2,500ms LCP gate still FAILS. This remains a feature-branch review, not a production-ready claim. Supabase/Groq/live audio/physical-device limitations remain unchanged.
+
+## Gift, photographic media and mobile follow-up (2026-10-20)
+
+- Replaced the invitation action with an original accessible purple gift box and finite opening sequence.
+- Added eight authored bilingual compliment variants; new entries avoid the prior variant, replay preserves it, and allowlisted share links retain it. The selected letter itself pops in with finite edge confetti; reduced motion remains static.
+- Retired the rejected procedural renderer from the recipient route. All seven choices use species-checked real media. Orchid and Alstroemeria have visually inspected, local recorded bud-to-open clips. The other five are photographic reveals, **not actual blooming**. The owner approved free verified footage and explicitly flagging missing coverage.
+- Removed the source accordion, flower counter/title strip and static-mode switch from the celebration. Retained media rights/provenance in the separate credits route and public manifest.
+- Corrected the mobile actor at <=800px to a 56px dock that scrolls away from the greeting/actions; compact landscape dialog. Geometry and interaction checks cover 320,375,491 and667×375.
+- WebKit native media network traffic is not consistently visible to Playwright. Media tests retain actual playback/time/pause assertions and use an explicitly documented API request for MIME/status evidence when necessary. A missing actual media URL tests native error recovery. No retry or timeout increase hides failures.
+
+Current final gate results and exact source fingerprint are in summary.json. Historical performance failures above describe earlier renderers, not a current measurement. True skeletal 3D actor, physical device testing, live audio and connected-cloud verification remain unavailable.
+
+Final current-source verification: all seven gates PASS at fingerprint185e3cbc84d16df3a17198f334ad149628eeb4b14d0338642684280590443c83. 3 name +21 TypeScript tests,3 embedded SQL suites,90 Chromium/WebKit journeys,zero axe findings,27 responsive captures,photographic motion checks and2 actual recorded blooms from the Pages export passed. Three cold-load lab runs: LCP median1924ms (1920–1984),CLS .01021,transfer745899B. Existing2500ms LCP/.1 CLS thresholds were not changed. Click-to-field median1108ms includes deliberate gift opening and is not INP. This establishes local scope acceptance, not connected-cloud deployment, real-phone performance or completion of the five missing bloom clips.
