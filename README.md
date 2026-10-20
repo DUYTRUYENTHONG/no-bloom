@@ -17,4 +17,4 @@ The GitHub Actions workflow exports only this service-free slice to GitHub Pages
 
 ## Current scope
 
-Slice 1 includes the invitation, preferred-name flow, 3D bloom, prepared Vietnamese and English greetings, replay, and a still floral view. It needs no environment variables or cloud service. AI, PNG export, saved links, and sharing are future slices. See [architecture](docs/architecture.md).
+Slice 1 includes the invitation, preferred-name flow, procedural 3D bloom, prepared Vietnamese and English greetings, replay, and a still floral view. It needs no environment variables or cloud service. AI, PNG export, saved links, and sharing are future slices. See [architecture](docs/architecture.md) and the [rose bloom implementation](docs/rose-bloom.md).

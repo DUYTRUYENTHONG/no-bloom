@@ -34,7 +34,7 @@ export type BotanicalState = GenerativeUiResponse["botanicalState"];
 const timing: Record<BotanicalState, { growthRate: number; transitionDurationMs: number }> = {
   BUD: { growthRate: 0, transitionDurationMs: 0 },
   SPROUT: { growthRate: 0.2, transitionDurationMs: 400 },
-  BLOOMING: { growthRate: 0.85, transitionDurationMs: 2700 },
+  BLOOMING: { growthRate: 0.85, transitionDurationMs: 7000 },
   FULL_BLOOM: { growthRate: 1, transitionDurationMs: 0 },
   WITHER_RELOAD: { growthRate: 0, transitionDurationMs: 450 },
 };
@@ -46,7 +46,7 @@ export function createBotanicalResponse(state: BotanicalState, locale: Locale, r
     botanicalState: state,
     animationConfig: {
       ...timing[state],
-      petalCount: 21,
+      petalCount: 64,
       primaryColor: state === "WITHER_RELOAD" ? "#A68F79" : "#F12682",
       secondaryColor: state === "WITHER_RELOAD" ? "#D9CCB8" : "#D2E87B",
     },

@@ -1,0 +1,10 @@
+import { chromium } from "@playwright/test";
+const browser = await chromium.launch({ channel: "chrome", headless: true, args: ["--enable-webgl", "--use-gl=angle", "--use-angle=swiftshader"] });
+const page = await browser.newPage();
+let count = 0;
+page.on("pageerror", error => { if (count++ === 0) console.log(error.stack); });
+page.on("console", message => { if (message.type() === "error" && count < 3) console.log("console:", message.text().slice(0, 800)); });
+await page.goto("http://localhost:3100/?bloomDebug=1");
+await page.waitForTimeout(3000);
+console.log("errors", count);
+await browser.close();

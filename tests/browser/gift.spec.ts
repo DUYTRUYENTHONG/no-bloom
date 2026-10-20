@@ -7,10 +7,8 @@ test("Vietnamese name opens a greeting and replay preserves it", async ({ page }
   await page.getByRole("button", { name: "Mở món quà" }).click();
   await page.getByRole("textbox", { name: "Tên bạn thích" }).fill("Lê Thị Mai");
   await page.getByRole("button", { name: "Để hoa nở vì bạn" }).click();
-  await page.getByRole("button", { name: "Mở ngay" }).click();
   await expect(page.getByRole("heading", { name: /Lê Thị Mai, chúc bạn/ })).toBeVisible();
   await page.getByRole("button", { name: "Xem hoa nở lại" }).click();
-  await page.getByRole("button", { name: "Mở ngay" }).click();
   await expect(page.getByRole("heading", { name: /Lê Thị Mai, chúc bạn/ })).toBeVisible();
 });
 
@@ -20,7 +18,6 @@ test("anonymous greeting works and can switch to English", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Xem hoa 3D" })).toBeDisabled();
   await page.getByRole("button", { name: "Mở món quà" }).click();
   await page.getByRole("button", { name: "Tiếp tục không cần tên" }).click();
-  await page.getByRole("button", { name: "Mở ngay" }).click();
   await expect(page.getByRole("heading", { name: "Chúc bạn một ngày 20/10 thật dịu dàng." })).toBeVisible();
   await page.getByRole("combobox", { name: "Ngôn ngữ" }).selectOption("en");
   await expect(page.getByRole("heading", { name: "Wishing you a gentle Vietnamese Women’s Day." })).toBeVisible();
@@ -39,7 +36,7 @@ test("320px reduced-motion view has no horizontal overflow", async ({ page }) =>
 });
 
 test("botanical payloads follow the gift lifecycle and use the approved FloralGreeting component", async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.addInitScript(() => {
     (window as typeof window & { botanicalPayloads: unknown[] }).botanicalPayloads = [];
     window.addEventListener("no-bloom:a2ui", (event) => {
@@ -64,22 +61,40 @@ test("botanical payloads follow the gift lifecycle and use the approved FloralGr
   expect(payloads.every((payload) => payload.type === "GENERATIVE_UI_RESPONSE" && payload.componentSpec.name === "FloralGreeting")).toBe(true);
 });
 
-test("matching rose artwork moves through bud, opening, and bloom with a 3D arc", async ({ page }) => {
+test("procedural roses render through the inspection poses and skip preserves greeting", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.goto("/");
-  const bud = page.locator(".rose-phase--bud");
-  const opening = page.locator(".rose-phase--opening");
-  const bloom = page.locator(".rose-phase--bloom");
-  await expect(bud).toHaveJSProperty("naturalWidth", 1024);
-  await expect(bud).toHaveCSS("opacity", "1");
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/?bloomDebug=1");
+  await expect(page.locator("[data-rose-renderer=webgl]")).toBeVisible();
+  const slider = page.locator(".rose-inspector input[type=range]");
+  for (const value of ["0", "0.25", "0.5", "0.75", "1"]) {
+    await slider.fill(value);
+    await expect(slider).toHaveValue(value);
+  }
+  await slider.fill("0");
   await page.getByRole("button", { name: "Mở món quà" }).click();
-  await expect(opening).toHaveCSS("opacity", "1");
   await page.getByRole("button", { name: "Tiếp tục không cần tên" }).click();
-  await expect(page.locator(".rose-depth")).toHaveCSS("animation-name", "rose-arc");
-  await expect(bloom).toHaveCSS("animation-name", "rose-reveal");
+  await expect(page.locator("main[data-botanical-state=BLOOMING]")).toBeVisible();
   await page.getByRole("button", { name: "Mở ngay" }).click();
-  await expect(bloom).toHaveCSS("opacity", "1");
-  await expect(bloom).toHaveJSProperty("naturalWidth", 1024);
+  await expect(page.getByRole("heading", { name: "Chúc bạn một ngày 20/10 thật dịu dàng." })).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test("WebGL failure keeps the static flowers and personal greeting usable", async ({ page }) => {
+  await page.addInitScript(() => {
+    const original = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement, kind, ...args) {
+      if (kind === "webgl2") return null;
+      return original.call(this, kind, ...args);
+    } as typeof original;
+  });
+  await page.goto("/");
+  await expect(page.locator("[data-rose-renderer=static]")).toBeVisible();
+  await page.getByRole("button", { name: "Mở món quà" }).click();
+  await page.getByRole("textbox", { name: "Tên bạn thích" }).fill("Mai");
+  await page.getByRole("button", { name: "Để hoa nở vì bạn" }).click();
+  await expect(page.getByRole("heading", { name: /Mai, chúc bạn/ })).toBeVisible();
 });
 
 test("flower, caption, controls, and greeting stay separated across responsive viewports", async ({ page }) => {
@@ -96,7 +111,7 @@ test("flower, caption, controls, and greeting stay separated across responsive v
     await page.setViewportSize({ width, height });
     await expect(page.locator(".story-panel")).toHaveCSS("order", width <= 800 ? "1" : "0");
     if (width <= 800) {
-      const expectedFrameHeight = Math.round(Math.min(500, Math.max(280, height * 0.52)));
+      const expectedFrameHeight = width <= 350 ? 290 : width <= 480 ? 330 : Math.round(Math.min(450, Math.max(300, height * 0.45)));
       await expect.poll(async () => Math.round(await page.locator(".flower-frame").evaluate((element) => element.getBoundingClientRect().height))).toBe(expectedFrameHeight);
     }
     const layout = await page.evaluate(() => {

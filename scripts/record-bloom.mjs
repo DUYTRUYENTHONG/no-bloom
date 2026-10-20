@@ -1,0 +1,20 @@
+import { chromium } from "@playwright/test";
+import { mkdir, rename } from "node:fs/promises";
+
+const output = "artifacts/bloom";
+await mkdir(output, { recursive: true });
+const browser = await chromium.launch({ channel: "chrome", headless: true, args: ["--enable-webgl", "--use-gl=angle", "--use-angle=swiftshader"] });
+const context = await browser.newContext({ viewport: { width: 390, height: 844 }, recordVideo: { dir: output, size: { width: 390, height: 844 } }, reducedMotion: "no-preference" });
+const page = await context.newPage();
+await page.goto("http://localhost:3100/");
+await page.locator("[data-rose-renderer=webgl]").waitFor({ timeout: 30000 });
+await page.getByRole("button", { name: "Mở món quà" }).click();
+await page.getByRole("textbox", { name: "Tên bạn thích" }).fill("Mai");
+await page.getByRole("button", { name: "Để hoa nở vì bạn" }).click();
+await page.getByRole("heading", { name: /Mai, chúc bạn/ }).waitFor({ timeout: 15000 });
+await page.waitForTimeout(400);
+const path = await page.video().path();
+await context.close();
+await browser.close();
+await rename(path, `${output}/mobile-bloom.webm`);
+console.log(`${output}/mobile-bloom.webm`);

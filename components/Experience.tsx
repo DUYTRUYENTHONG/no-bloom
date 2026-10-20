@@ -23,7 +23,6 @@ export function Experience() {
   const t = copy[locale];
   const botanicalState: BotanicalState = error ? "WITHER_RELOAD" : stage === "invitation" ? "BUD" : stage === "personalization" ? "SPROUT" : stage === "blooming" ? "BLOOMING" : stage === "withering" ? "WITHER_RELOAD" : "FULL_BLOOM";
   const payload = createBotanicalResponse(botanicalState, locale, name);
-  const bloomDurationMs = createBotanicalResponse("BLOOMING", locale, name).animationConfig.transitionDurationMs;
 
   useEffect(() => {
     window.dispatchEvent(new CustomEvent("no-bloom:a2ui", { detail: payload }));
@@ -55,8 +54,6 @@ export function Experience() {
     setName(selectedName);
     setError("");
     setStage("blooming");
-    if (staticMode || reducedMotion) timer.current = setTimeout(finish, 250);
-    else timer.current = setTimeout(finish, bloomDurationMs);
   }
 
   function submitName(event: React.FormEvent<HTMLFormElement>) {
@@ -122,6 +119,7 @@ export function Experience() {
         {stage === "blooming" && <div className="story-content blooming-content">
           <p className="overline">A FLOWER, JUST FOR YOU</p>
           <h1>{t.preparing}</h1>
+          <p className="visually-hidden">{payload.componentSpec.props.data.message}</p>
           <button className="text-button skip-button" onClick={finish}>{t.skip}<span aria-hidden="true">→</span></button>
         </div>}
         {stage === "greeting" && <FloralGreeting payload={payload} ref={headingRef} onReplay={replay} onRestart={() => beginWither("restart")} />}
@@ -132,7 +130,7 @@ export function Experience() {
       <section className="flower-panel" aria-label={t.flowerDescription}>
         <div className="flower-halo" aria-hidden="true" />
         <div className="flower-frame">
-          <RoseBloom stage={stage} motionEnabled={!showStatic} durationMs={bloomDurationMs} />
+          <RoseBloom stage={stage} motionEnabled={!showStatic} onComplete={finish} />
         </div>
         <div className="flower-caption"><span className="caption-line" /><span>01 / 01</span><span className="caption-name">ROSES IN BLOOM</span></div>
         <button className="mode-button" onClick={() => setStaticMode((value) => !value)} disabled={reducedMotion} aria-label={showStatic ? t.animated : t.static}>{showStatic ? t.animated : t.static}</button>
