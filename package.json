@@ -7,8 +7,9 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "test": "node --test tests/*.test.mjs && tsx --test tests/*.test.ts",
-    "test:e2e": "playwright test"
+    "test": "node --test tests/*.test.mjs && tsx --test tests/*.test.ts && node scripts/test-analytics-sql.mjs",
+    "test:e2e": "playwright test",
+    "test:exported-analytics": "node scripts/test-exported-analytics.mjs"
   },
   "dependencies": {
     "@react-three/fiber": "^9.8.2",
@@ -19,6 +20,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.10",
     "@playwright/test": "^1.64.1",
     "@types/node": "^24.0.0",
     "@types/react": "^19.2.0",

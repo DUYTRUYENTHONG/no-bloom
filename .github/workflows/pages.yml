@@ -29,6 +29,8 @@ jobs:
       - run: npm run build
         env:
           GITHUB_PAGES: "true"
+          NEXT_PUBLIC_ANALYTICS_ENABLED: ${{ vars.NEXT_PUBLIC_ANALYTICS_ENABLED }}
+          NEXT_PUBLIC_ANALYTICS_ENDPOINT: ${{ vars.NEXT_PUBLIC_ANALYTICS_ENDPOINT }}
       - run: touch out/.nojekyll
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4

@@ -6,6 +6,7 @@ import { createBotanicalResponse, type BotanicalState } from "@/lib/botanical-ui
 import { validateName } from "@/lib/name";
 import { FloralGreeting } from "./FloralGreeting";
 import { RoseBloom } from "./RoseBloom";
+import { AnalyticsPreference } from "./AnalyticsPreference";
 
 type Stage = "invitation" | "personalization" | "blooming" | "greeting" | "withering";
 
@@ -91,6 +92,7 @@ export function Experience() {
     <header className="site-header">
       <div className="brand" aria-label="NỞ">NỞ<span className="brand-mark">✳</span></div>
       <div className="header-actions">
+        <AnalyticsPreference locale={locale} />
         <label className="language-select"><span className="visually-hidden">{t.locale}</span><select value={locale} onChange={(event) => setLocale(event.target.value as Locale)} aria-label={t.locale}><option value="vi">VI</option><option value="en">EN</option></select></label>
       </div>
     </header>

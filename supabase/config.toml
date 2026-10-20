@@ -1,0 +1,4 @@
+project_id = "no-bloom-local"
+
+[functions.record-visit]
+verify_jwt = false
