@@ -4,14 +4,12 @@ import { useEffect, useRef, useState, type RefObject } from "react";
 import type { Locale } from "@/lib/content";
 
 /** A finite, compositor-only 2.5D greeting. No audio, AI call or render loop. */
-export function ActorIntroduction({ locale, stage, dock, onActiveChange }: {
+export function ActorIntroduction({ stage, dock, onActiveChange }: {
   locale: Locale; stage: string; dock: RefObject<HTMLButtonElement | null>; onActiveChange: (active: boolean) => void;
 }) {
   const [active, setActive] = useState(false);
   const figure = useRef<HTMLImageElement>(null);
-  const skip = useRef<HTMLButtonElement>(null);
   const completed = useRef(false);
-  const finishRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     if (completed.current || stage !== "invitation") return;
@@ -26,11 +24,8 @@ export function ActorIntroduction({ locale, stage, dock, onActiveChange }: {
       completed.current = true;
       animation?.cancel();
       clearTimeout(loadingTimer);
-      const returnFocus = document.activeElement === skip.current;
       setActive(false); onActiveChange(false);
-      if (returnFocus) dock.current?.focus({ preventScroll: true });
     };
-    finishRef.current = finish;
     const start = () => {
       if (disposed || started || document.hidden || !figure.current) return;
       started = true; clearTimeout(loadingTimer);
@@ -65,7 +60,10 @@ export function ActorIntroduction({ locale, stage, dock, onActiveChange }: {
     };
     const interrupt = (event: Event) => { if (!(event.target instanceof Element) || !event.target.closest(".actor-introduction")) finish(); };
     const motionChange = () => { if (reduced.matches) finish(); };
-    const key = (event: KeyboardEvent) => { if (["Escape", "Tab", "Enter"].includes(event.key)) finish(); };
+    const key = (event: KeyboardEvent) => {
+      if (["Escape", "Tab", "Enter"].includes(event.key)) finish();
+      if (event.key === "Escape") dock.current?.focus({ preventScroll: true });
+    };
     document.addEventListener("visibilitychange", visibility);
     document.addEventListener("pointerdown", interrupt, { capture: true });
     document.addEventListener("keydown", key);
@@ -86,6 +84,5 @@ export function ActorIntroduction({ locale, stage, dock, onActiveChange }: {
 
   return <div className={`actor-introduction ${active ? "is-active" : ""}`} data-active={active}>
     <img ref={figure} src="guide-avatar.webp" width="112" height="145" decoding="async" alt="" aria-hidden="true" />
-    {active && <div className="actor-introduction-note"><p>{locale === "vi" ? "Một đóa hoa dành tặng bạn." : "A flower, just for you."}</p><button ref={skip} type="button" onClick={() => { finishRef.current(); dock.current?.focus({ preventScroll: true }); }}>{locale === "vi" ? "Bỏ qua giới thiệu" : "Skip introduction"}</button></div>}
   </div>;
 }

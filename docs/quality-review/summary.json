@@ -1,18 +1,18 @@
 {
-  "checkedAt": "2026-10-20T11:20:05.693Z",
-  "sourceFingerprint": "d77a6847cb5621d8ef858dda25d4683c50baabba5bde2c9b179f0673905dac1e",
+  "checkedAt": "2026-10-20T11:24:06.982Z",
+  "sourceFingerprint": "eb6f58d55dd9e9e94ecee1c55ee34b1dabf8f5ae753161da17eaf9c62f21a61a",
   "overall": "PASS",
   "scope": "Visitor counter implementation and static frontend release; Vercel/Upstash provisioning pending.",
   "readyForProduction": false,
   "gates": {
     "fast": {
-      "checkedAt": "2026-10-20T11:12:50.232Z",
-      "sourceFingerprint": "5082176012307475c028b4955d7aeff8643194e1ff5106c5ef86e0e859ebf30f",
+      "checkedAt": "2026-10-20T11:22:23.346Z",
+      "sourceFingerprint": "eb6f58d55dd9e9e94ecee1c55ee34b1dabf8f5ae753161da17eaf9c62f21a61a",
       "status": "PASS"
     },
     "build": {
-      "checkedAt": "2026-10-20T11:19:13.684Z",
-      "sourceFingerprint": "d77a6847cb5621d8ef858dda25d4683c50baabba5bde2c9b179f0673905dac1e",
+      "checkedAt": "2026-10-20T11:22:54.559Z",
+      "sourceFingerprint": "eb6f58d55dd9e9e94ecee1c55ee34b1dabf8f5ae753161da17eaf9c62f21a61a",
       "status": "PASS"
     },
     "journeys": {
@@ -21,8 +21,8 @@
       "status": "PASS"
     },
     "a11y": {
-      "checkedAt": "2026-10-20T11:17:56.752Z",
-      "sourceFingerprint": "5082176012307475c028b4955d7aeff8643194e1ff5106c5ef86e0e859ebf30f",
+      "checkedAt": "2026-10-20T11:23:49.973Z",
+      "sourceFingerprint": "eb6f58d55dd9e9e94ecee1c55ee34b1dabf8f5ae753161da17eaf9c62f21a61a",
       "status": "PASS"
     },
     "visual": {
@@ -51,7 +51,8 @@
     "exportedRecordedBlooms": 2,
     "trafficUnit": 8,
     "actualRedis": "PASS: isolated Redis7.4 CI run39410652598",
-    "enabledCounterExport": "PASS: isolated local collector, actual Pages export"
+    "enabledCounterExport": "PASS: isolated local collector, actual Pages export",
+    "introductionRemovalBrowserChecks": 24
   },
   "performance": {
     "lcpMs": {
@@ -116,9 +117,9 @@
     "Native WebKit media response visibility requires documented API MIME/status fallback while actual playback remains asserted",
     "Native hooks remain pending normal trust review"
   ],
-  "deployment": "Frontend approved for Pages publication with counter disabled/unavailable. Backend activation requires approved resources and server credentials; no production events generated.",
+  "deployment": "Owner authorized production publication. Pages CI pending; traffic backend still unconnected and disabled.",
   "evidence": "artifacts/quality/final (local and ignored)",
   "priorRun": "One local WebKit run had108/111 due hydration/animation timing; unchanged-source rerun111/111. Earlier performance max2744ms failed; font discovery fixed and all3 final loads2316–2444ms pass. Motion pause check corrected to await asynchronous pause commit.",
   "frontendReadyForDeployment": true,
-  "evidenceScope": "Fast/journeys/a11y/visual/performance receipts retain their measured5082176 fingerprint. The only subsequent source delta is a test-harness wait for Animation.ready before pause-time sampling; build and motion rerun against final source. No passing receipt has been relabelled."
+  "evidenceScope": "Fast/journeys/a11y/visual/performance receipts retain their measured5082176 fingerprint. The only subsequent source delta is a test-harness wait for Animation.ready before pause-time sampling; build and motion rerun against final source. No passing receipt has been relabelled. Final owner correction removes the introduction note/skip control; Escape dismisses and focuses the dock. Fast/build/a11y and24 Chromium/WebKit introduction/guide cases pass on this delta. Earlier complete111 journeys,visual,motion and performance receipts retain their measured fingerprints; production CI reruns full journeys."
 }

@@ -23,10 +23,12 @@ test("actor introduction jumps, offers and docks without layout shifts", async (
   expect(await page.locator("canvas").count()).toBe(0);
 });
 
-test("actor introduction skip returns focus and does not repeat on locale change", async ({ page }) => {
+test("actor introduction Escape returns focus without a message and does not repeat on locale change", async ({ page }) => {
   await page.goto("/");
-  const skip = page.getByRole("button", { name: "Bỏ qua giới thiệu" });
-  await skip.click();
+  await expect(page.locator('.actor-introduction')).toHaveAttribute('data-active','true');
+  await expect(page.locator('.actor-introduction-note')).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'Bỏ qua giới thiệu'})).toHaveCount(0);
+  await page.keyboard.press('Escape');
   await expect(page.getByRole("button", { name: "Mở bạn đồng hành" })).toBeFocused();
   await page.getByRole("combobox", { name: "Ngôn ngữ" }).selectOption("en");
   await expect(page.locator(".actor-introduction")).toHaveAttribute("data-active", "false");
