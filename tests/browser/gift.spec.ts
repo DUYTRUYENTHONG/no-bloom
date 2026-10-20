@@ -5,7 +5,7 @@ test("Vietnamese name opens a greeting and replay preserves it", async ({ page }
   await page.goto("/");
   await expect(page.getByRole("button", { name: "Xem hoa 3D" })).toBeDisabled();
   await page.getByRole("button", { name: "Mở món quà" }).click();
-  await page.getByRole("textbox", { name: "Tên bạn thích" }).fill("Lê Thị Mai");
+  await page.getByRole("textbox", { name: "Tên của bạn" }).fill("Lê Thị Mai");
   await page.getByRole("button", { name: "Để hoa nở vì bạn" }).click();
   await expect(page.getByRole("heading", { name: /Lê Thị Mai, chúc bạn/ })).toBeVisible();
   await page.getByRole("button", { name: "Xem hoa nở lại" }).click();
@@ -49,7 +49,7 @@ test("botanical payloads follow the gift lifecycle and use the approved FloralGr
   await expect(page.locator("main[data-botanical-state='SPROUT']")).toBeVisible();
   await page.getByRole("button", { name: "Để hoa nở vì bạn" }).click();
   await expect(page.locator("main[data-botanical-state='WITHER_RELOAD']")).toBeVisible();
-  await page.getByRole("textbox", { name: "Tên bạn thích" }).fill("Mai");
+  await page.getByRole("textbox", { name: "Tên của bạn" }).fill("Mai");
   await page.getByRole("button", { name: "Để hoa nở vì bạn" }).click();
   await expect(page.locator("main[data-botanical-state='BLOOMING']")).toBeVisible();
   await page.getByRole("button", { name: "Mở ngay" }).click();
@@ -92,7 +92,7 @@ test("WebGL failure keeps the static flowers and personal greeting usable", asyn
   await page.goto("/");
   await expect(page.locator("[data-rose-renderer=static]")).toBeVisible();
   await page.getByRole("button", { name: "Mở món quà" }).click();
-  await page.getByRole("textbox", { name: "Tên bạn thích" }).fill("Mai");
+  await page.getByRole("textbox", { name: "Tên của bạn" }).fill("Mai");
   await page.getByRole("button", { name: "Để hoa nở vì bạn" }).click();
   await expect(page.getByRole("heading", { name: /Mai, chúc bạn/ })).toBeVisible();
 });
@@ -139,4 +139,49 @@ test("flower, caption, controls, and greeting stay separated across responsive v
       expect(layout.story.top, `${width}×${height}: flower consumes the full first screen`).toBeLessThan(height);
     }
   }
+});
+
+test("every flower choice has attached bud and bloom poses and remains selectable on mobile", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/?bloomDebug=1");
+  await page.getByRole("button", { name: "Mở món quà" }).click();
+  for (const kind of ["rose", "peach-rose", "peony", "cherry", "lily", "alstroemeria", "orchid"]) {
+    await page.locator("#flower-kind").selectOption(kind);
+    await expect(page.locator("[data-rose-renderer=webgl]")).toBeVisible();
+    const slider = page.locator(".rose-inspector input[type=range]");
+    await slider.fill("0");
+    await slider.fill("0.5");
+    await slider.fill("1");
+    await expect(page.locator("main")).toHaveAttribute("data-botanical-state", "SPROUT");
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  }
+  expect(errors).toEqual([]);
+});
+
+test("orchid has a species-matched fallback when WebGL is unavailable", async ({ page }) => {
+  await page.addInitScript(() => { HTMLCanvasElement.prototype.getContext = () => null; });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Mở món quà" }).click();
+  await page.locator("#flower-kind").selectOption("orchid");
+  await expect(page.locator(".static-rose-fallback svg")).toBeVisible();
+  await page.getByRole("button", { name: "Tiếp tục không cần tên" }).click();
+  await expect(page.getByRole("heading", { name: "Chúc bạn một ngày 20/10 thật dịu dàng." })).toBeVisible();
+});
+
+test("personal link opens directly for the named recipient and guide remains usable", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/?for=L%C3%AA+Th%E1%BB%8B+Mai&flower=peony");
+  await expect(page.getByRole("heading", { name: /Lê Thị Mai, chúc bạn/ })).toBeVisible();
+  await expect(page.locator(".caption-name")).toContainText("PEON");
+  await page.getByRole("button", { name: "Mở bạn đồng hành" }).click();
+  await expect(page.getByText("Bạn đồng hành NỞ")).toBeVisible();
+  await page.getByRole("button", { name: "Cách tạo liên kết riêng?" }).click();
+  await expect(page.getByRole("log")).toContainText("Sao chép liên kết riêng");
+  await page.getByRole("button", { name: "Đóng bạn đồng hành" }).first().click();
+  await page.getByRole("button", { name: "Tạo lời chúc mới" }).click();
+  await expect(page.getByRole("textbox", { name: "Tên của bạn" })).toHaveValue("");
+  await expect(page).not.toHaveURL(/for=/);
 });

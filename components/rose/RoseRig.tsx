@@ -6,11 +6,12 @@ import { CatmullRomCurve3, DoubleSide, Group, Mesh, MeshStandardMaterial, TubeGe
 import { bloomConfig, type BloomQuality } from "@/lib/bloom.config";
 import { petalPose, smooth } from "@/lib/bloom-pose";
 import { createLeafGeometry, createPetalGeometry } from "./PetalGeometry";
+import { flowerCatalog, type FlowerKind } from "@/lib/flower-catalog";
 
 type Petal = { layer: number; index: number; pivot: Group | null; mesh: Mesh | null };
-type Props = { primary: boolean; progress: RefObject<number>; quality: BloomQuality; wireframe?: boolean; visible?: boolean };
+type Props = { primary: boolean; progress: RefObject<number>; quality: BloomQuality; kind?: Extract<FlowerKind, "rose" | "peach-rose">; wireframe?: boolean; visible?: boolean };
 
-export function RoseRig({ primary, progress, quality, wireframe = false, visible = true }: Props) {
+export function RoseRig({ primary, progress, quality, kind = "rose", wireframe = false, visible = true }: Props) {
   const seed = bloomConfig.seed + (primary ? 0 : 734);
   const counts = primary ? [11, 10, 8, 6] : [9, 8, 7, 5];
   const petals = useMemo(() => counts.flatMap((count, layer) => Array.from({ length: count }, (_, index) => {
@@ -19,14 +20,16 @@ export function RoseRig({ primary, progress, quality, wireframe = false, visible
       length: [0.95, 0.88, 0.78, 0.68][layer] * (0.96 + random * 0.08),
       width: [0.49, 0.40, 0.31, 0.24][layer] * (0.92 + random * 0.16),
       curl: [0.39, 0.31, 0.23, 0.14][layer], variation: random,
+      closedWidth: [0.94, 0.83, 0.67, 0.53][layer],
+      closedLength: [0.72, 0.85, 0.93, 1.07][layer],
     };
-    return { layer, index, count, random, geometry: createPetalGeometry(shape, quality) };
-  })), [primary, quality, seed]);
+    return { layer, index, count, random, geometry: createPetalGeometry(shape, quality, flowerCatalog[kind]) };
+  })), [primary, quality, seed, kind]);
   const petalMaterial = useMemo(() => new MeshStandardMaterial({ vertexColors: true, side: DoubleSide, roughness: 0.78, metalness: 0, wireframe }), [wireframe]);
   const leafMaterial = useMemo(() => new MeshStandardMaterial({ color: bloomConfig.colors.leaf, side: DoubleSide, roughness: 0.81, metalness: 0, wireframe }), [wireframe]);
   const stemMaterial = useMemo(() => new MeshStandardMaterial({ color: "#426628", roughness: 0.84, metalness: 0 }), []);
   const leafGeometry = useMemo(() => createLeafGeometry(0.72, 0.28, quality), [quality]);
-  const sepalGeometry = useMemo(() => createLeafGeometry(0.36, 0.115, quality), [quality]);
+  const sepalGeometry = useMemo(() => createLeafGeometry(0.78, 0.19, quality), [quality]);
   const stemGeometry = useMemo(() => new TubeGeometry(new CatmullRomCurve3([
     new Vector3(0, -0.02, 0), new Vector3(-0.06, -0.6, 0),
     new Vector3(primary ? -0.17 : 0.1, -1.35, 0.02),
@@ -55,7 +58,7 @@ export function RoseRig({ primary, progress, quality, wireframe = false, visible
       }
     }
     const relax = smooth(value * 5);
-    sepalRefs.current.forEach((sepal) => { if (sepal) sepal.rotation.x = -0.28 - relax * 0.32; });
+    sepalRefs.current.forEach((sepal) => { if (sepal) sepal.rotation.x = 0.02 - relax * 0.57; });
   });
 
   const scale = primary ? 1.16 : 0.91;
@@ -68,9 +71,9 @@ export function RoseRig({ primary, progress, quality, wireframe = false, visible
     ].map((leaf, index) => <group key={index} position={leaf.position} rotation={[leaf.twist, 0, leaf.angle]}>
       <mesh geometry={leafGeometry} material={leafMaterial} />
     </group>)}
-    <mesh position={[0, -0.035, 0]} scale={[0.13, 0.13, 0.13]}><sphereGeometry args={[1, 12, 10]} /><meshStandardMaterial color="#31501f" roughness={0.9} /></mesh>
+    <mesh position={[0, 0.035, 0]} scale={[0.19, 0.23, 0.19]}><sphereGeometry args={[1, 12, 10]} /><meshStandardMaterial color="#31501f" roughness={0.9} /></mesh>
     {Array.from({ length: 5 }, (_, index) => <group key={`sepal-${index}`} rotation={[0, index * Math.PI * 2 / 5, 0]}>
-      <group ref={(node) => { sepalRefs.current[index] = node; }} rotation={[-0.28, 0, 0]}>
+      <group ref={(node) => { sepalRefs.current[index] = node; }} position={[0, 0.03, 0.29]} rotation={[0.02, 0, 0]}>
         <mesh geometry={sepalGeometry} material={leafMaterial} />
       </group>
     </group>)}

@@ -9,7 +9,7 @@ const page = await context.newPage();
 await page.goto("http://localhost:3100/");
 await page.locator("[data-rose-renderer=webgl]").waitFor({ timeout: 30000 });
 await page.getByRole("button", { name: "Mở món quà" }).click();
-await page.getByRole("textbox", { name: "Tên bạn thích" }).fill("Mai");
+await page.getByRole("textbox", { name: "Tên của bạn" }).fill("Mai");
 await page.getByRole("button", { name: "Để hoa nở vì bạn" }).click();
 await page.getByRole("heading", { name: /Mai, chúc bạn/ }).waitFor({ timeout: 15000 });
 await page.waitForTimeout(400);

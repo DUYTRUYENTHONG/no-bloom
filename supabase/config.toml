@@ -2,3 +2,9 @@ project_id = "no-bloom-local"
 
 [functions.record-visit]
 verify_jwt = false
+
+[functions.visitor-counter]
+verify_jwt = false
+
+[functions.flower-guide]
+verify_jwt = false

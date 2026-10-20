@@ -7,9 +7,11 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "test": "node --test tests/*.test.mjs && tsx --test tests/*.test.ts && node scripts/test-analytics-sql.mjs",
+    "test": "node --test tests/*.test.mjs && tsx --test tests/*.test.ts && node scripts/test-analytics-sql.mjs && node scripts/test-counter-sql.mjs && node scripts/test-guide-sql.mjs",
     "test:e2e": "playwright test",
-    "test:exported-analytics": "node scripts/test-exported-analytics.mjs"
+    "test:exported-analytics": "node scripts/test-exported-analytics.mjs",
+    "test:exported-counter": "node scripts/test-exported-counter.mjs",
+    "test:exported-guide": "node scripts/test-exported-guide.mjs"
   },
   "dependencies": {
     "@react-three/fiber": "^9.8.2",

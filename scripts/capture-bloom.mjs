@@ -8,18 +8,24 @@ for (const [width, height] of [[1440, 900], [1024, 768], [768, 900], [390, 844],
   const page = await browser.newPage({ viewport: { width, height }, reducedMotion: "no-preference" });
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
+  page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
   await page.goto("http://localhost:3100/?bloomDebug=1");
+  if (process.env.BLOOM_KIND) {
+    await page.getByRole("button", { name: "Mở món quà" }).click();
+    await page.locator("#flower-kind").selectOption(process.env.BLOOM_KIND);
+  }
   await page.locator(".rose-inspector input[type=range]").waitFor();
   await page.locator("[data-rose-renderer=webgl]").waitFor({ timeout: 30000 }).catch(() => {});
+  console.log(`selected ${process.env.BLOOM_KIND ?? "rose"}: renderer=${await page.locator(".rose-bloom").getAttribute("data-rose-renderer")}; errors=${errors.slice(0,3).join(" | ")}`);
   for (const value of [0, 0.25, 0.5, 0.75, 1]) {
     await page.locator(".rose-inspector").evaluate((element) => { element.style.opacity = "1"; });
     await page.locator(".rose-inspector input[type=range]").fill(String(value));
     await page.waitForTimeout(180);
     await page.locator(".rose-inspector").evaluate((element) => { element.style.opacity = "0"; });
-    await page.locator(".flower-panel").screenshot({ path: `${output}/${width}-${value}.png` });
+    await page.locator(".flower-panel").screenshot({ path: `${output}/${process.env.BLOOM_KIND ? `${process.env.BLOOM_KIND}-` : ""}${width}-${value}.png` });
   }
-  await page.getByRole("button", { name: "Mở món quà" }).click();
-  await page.getByRole("textbox", { name: "Tên bạn thích" }).fill("Mai");
+  if (!process.env.BLOOM_KIND) await page.getByRole("button", { name: "Mở món quà" }).click();
+  await page.getByRole("textbox", { name: "Tên của bạn" }).fill("Mai");
   await page.getByRole("button", { name: "Để hoa nở vì bạn" }).click();
   await page.getByRole("button", { name: "Mở ngay" }).click();
   await page.getByRole("heading", { name: /Mai, chúc bạn/ }).waitFor();

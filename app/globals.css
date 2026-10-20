@@ -104,6 +104,7 @@ input:focus{border-color:#e0f395;box-shadow:0 2px 0 #e0f395}
 .rose-canvas{position:absolute!important;inset:0;width:100%!important;height:100%!important;pointer-events:none!important}
 .static-rose-fallback{position:absolute;inset:0;display:grid;place-items:center;overflow:hidden;background:#071008}
 .static-rose-fallback img{width:100%;height:100%;object-fit:contain;object-position:center center;display:block;mask-image:linear-gradient(to bottom,transparent,#000 8%,#000 91%,transparent)}
+.static-rose-fallback svg{width:100%;height:100%;display:block}
 .rose-inspector{position:absolute;left:8px;bottom:8px;z-index:4;width:min(280px,calc(100% - 16px));max-height:65%;overflow:auto;background:#071008ed;border:1px solid #b5d34b;color:#f7f3e9;padding:12px;font-size:12px;pointer-events:auto;display:grid;gap:8px}
 .rose-inspector label{display:flex;gap:7px;align-items:center}
 .rose-inspector input[type=range]{height:auto;flex:1}
@@ -122,4 +123,41 @@ input:focus{border-color:#e0f395;box-shadow:0 2px 0 #e0f395}
 .analytics-choice-actions button{min-height:44px;border:1px solid #3c5527;background:#3c5527;color:#fff;padding:8px 15px;font-size:13px;font-weight:600}
 .analytics-choice-actions button+button{background:transparent;color:#26311f}
 @media(max-width:480px){.header-actions{gap:5px}.privacy-button{font-size:11px;padding:6px}.analytics-choice{right:10px;width:calc(100vw - 20px);padding:18px}}
+
+.flower-choice{max-width:420px;margin:20px 0 0}
+.flower-choice label{display:block;font-size:12px;letter-spacing:.12em;font-weight:700;color:#c7db83;text-transform:uppercase;margin-bottom:8px}
+.flower-choice select{width:100%;min-height:48px;border:1px solid #9eaf70;border-radius:2px;background:#0e1a09;color:#f7f4e7;padding:8px 12px;font-size:16px}
+.flower-choice select:focus-visible,.analytics-choice button:focus-visible{outline-color:#e0f395}
+.flower-choice+form{margin-top:20px}
+.visitor-counter{position:relative;z-index:2;margin:5px auto 0;color:#c9d8a3;font-size:11px;line-height:1.5;text-align:center;max-width:95%}
+.visitor-counter strong{color:#e4f3a5;font-weight:700}
+.copy-status{min-height:1.4em;margin:10px 0 0;color:#d6e9a5;font-size:12px}
+.rose-bud-reference{position:absolute;inset:0;display:grid;place-items:center;background:radial-gradient(ellipse at 55% 38%,#273b13 0%,#101d0b 46%,#071008 80%);pointer-events:none;z-index:2;opacity:1;transition:opacity 1.4s ease}
+.rose-bud-reference img{display:block;width:100%;height:100%;object-fit:contain;object-position:center}
+.rose-bud-reference.is-opening{opacity:0}
+.flower-guide{position:fixed;z-index:45;right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:flex-end;gap:6px;pointer-events:none}
+.flower-guide>*{pointer-events:auto}
+.guide-actor-button{width:112px;height:145px;position:relative;border:0;background:transparent;padding:0;filter:drop-shadow(0 8px 12px #0009)}
+.guide-actor-button img{width:100%;height:100%;object-fit:contain;transform-origin:50% 90%;transition:transform .25s ease}
+.guide-actor-button:hover img{transform:translateY(-3px) rotate(-3deg)!important}
+.guide-actor-button img.is-acting{animation:guide-greet .52s ease-out}
+.guide-actor-button span{position:absolute;right:0;bottom:1px;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#d2e87b;color:#10200a;font-weight:700}
+@keyframes guide-greet{0%{transform:rotate(0deg)}45%{transform:rotate(-7deg) translateY(-4px)}100%{transform:rotate(0deg)}}
+.guide-panel{width:min(360px,calc(100vw - 24px));max-height:min(70svh,520px);overflow:auto;background:#f7f5ec;color:#24321a;border:1px solid #b5d34b;box-shadow:0 15px 45px #000a;padding:18px;border-radius:12px}
+.guide-heading{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.guide-heading strong{font:600 21px var(--serif)}
+.guide-heading button{border:0;background:transparent;font-size:25px;line-height:1;color:#24321a;min-width:36px;min-height:36px}
+.guide-intro,.guide-disclosure{font-size:13px;line-height:1.5;margin:10px 0}
+.guide-disclosure{font-size:11px;color:#526044}
+.guide-prompts{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}
+.guide-prompts button{border:1px solid #acc17b;border-radius:20px;background:#eff4df;color:#233716;padding:7px 10px;font-size:12px;min-height:36px}
+.guide-messages{display:grid;gap:8px;max-height:170px;overflow:auto}
+.guide-message{margin:0;border-radius:10px;padding:9px 11px;line-height:1.5;font-size:13px;background:#e6ecd5;color:#233716;overflow-wrap:anywhere}
+.guide-message.is-user{background:#354b24;color:#f7f5ec;justify-self:end;max-width:90%}
+.guide-form{display:flex;gap:7px;max-width:none;margin:10px 0 0}
+.guide-form input{height:44px;min-width:0;background:#fff;color:#233716;border:1px solid #acc17b;padding:8px;font-size:13px}
+.guide-form button{border:0;background:#354b24;color:#fff;min-width:62px;padding:7px;font-size:12px}
+@media(max-width:480px){.guide-actor-button{width:76px;height:98px}.guide-panel{max-height:60svh}.flower-guide{right:8px;bottom:max(8px,env(safe-area-inset-bottom))}}
+@media(max-width:480px){.flower-guide:not(.is-open) .guide-actor-button{width:54px;height:54px;border:1px solid #b5d34b;border-radius:50%;background:#17240f;overflow:hidden}.flower-guide:not(.is-open) .guide-actor-button img{width:100%;height:140%;object-fit:cover;object-position:50% 3%}.flower-guide:not(.is-open) .guide-actor-button span{width:19px;height:19px;font-size:12px}}
+@media(prefers-reduced-motion:reduce){.guide-actor-button img{animation:none!important;transform:none!important;transition:none!important}}
 

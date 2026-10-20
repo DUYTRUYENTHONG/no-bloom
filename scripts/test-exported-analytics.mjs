@@ -54,7 +54,7 @@ try {
   assert.deepEqual(Object.keys(events[0]).sort(), ["event_id", "occurred_at", "page_key", "source_category", "visitor_id"]);
   assert.equal(events[0].page_key, "invitation");
   await page.getByRole("button", { name: "Mở món quà" }).click();
-  await page.getByRole("textbox", { name: "Tên bạn thích" }).fill("Mai");
+  await page.getByRole("textbox", { name: "Tên của bạn" }).fill("Mai");
   await page.getByRole("button", { name: "Để hoa nở vì bạn" }).click();
   await page.getByRole("heading", { name: /Mai, chúc bạn/ }).waitFor();
   assert.equal(events.length, 1, "name, bloom, and greeting are not page views");

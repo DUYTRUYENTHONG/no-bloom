@@ -37,6 +37,8 @@
   ],
   "exclude": [
     "node_modules",
-    "supabase/functions/record-visit/index.ts"
+    "supabase/functions/record-visit/index.ts",
+    "supabase/functions/visitor-counter/index.ts",
+    "supabase/functions/flower-guide/index.ts"
   ]
 }

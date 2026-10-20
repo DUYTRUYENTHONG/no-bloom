@@ -13,10 +13,13 @@ npm run dev
 
 Open `http://localhost:3000`. Run `npm test`, `npm run test:e2e`, `npm run typecheck`, and `npm run build` for checks. The browser suite uses installed Chrome.
 
-The GitHub Actions workflow exports only this service-free slice to GitHub Pages. A normal local build keeps Next.js server features available for later slices. Once AI or card routes are implemented, their deployment must use a server-capable host.
+GitHub Actions exports the gift to GitHub Pages. Optional analytics, the visitor counter, and Groq guide use separate Supabase Edge Functions; Pages cannot execute those functions. The gift itself runs when they are unavailable.
 
 ## Current scope
 
-Slice 1 includes the invitation, preferred-name flow, procedural 3D bloom, prepared Vietnamese and English greetings, replay, and a still floral view. It needs no environment variables or cloud service. AI, PNG export, saved links, and sharing are future slices. See [architecture](docs/architecture.md) and the [rose bloom implementation](docs/rose-bloom.md).
+The gift includes the invitation, name entry, flower bloom, Vietnamese and English greetings, replay, a still floral view, and personal links. These work without cloud services. The optional Groq guide requires a separately deployed function; PNG export and saved cards remain future work. See [architecture](docs/architecture.md) and the [rose bloom implementation](docs/rose-bloom.md).
+Personal share links and the optional Groq guide are documented in [personal links and guide](docs/personal-links-and-guide.md). The guide falls back to local help until its server endpoint is configured.
 
 Optional visitor analytics is prepared separately for Supabase and remains disabled until configured and deployed. See [visitor analytics](docs/visitor-analytics.md).
+
+The optional recognized-browser counter is also prepared for Supabase and disabled by default. It shares the consent choice but has separate storage and counting semantics. See [visitor counter](docs/visitor-counter.md).

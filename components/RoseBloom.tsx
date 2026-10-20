@@ -3,11 +3,13 @@
 import dynamic from "next/dynamic";
 import { Component, useEffect, useState, type ReactNode } from "react";
 import type { BloomQuality } from "@/lib/bloom.config";
+import type { FlowerKind } from "@/lib/flower-catalog";
 import type { DebugCommand } from "./rose/RoseCanvas";
+import { StaticFlowerFallback } from "./rose/StaticFlowerFallback";
 
 const RoseCanvas = dynamic(() => import("./rose/RoseCanvas").then((module) => module.RoseCanvas), { ssr: false });
 type Stage = "invitation" | "personalization" | "blooming" | "greeting" | "withering";
-type Props = { stage: Stage; motionEnabled: boolean; onComplete: () => void };
+type Props = { stage: Stage; kind: FlowerKind; motionEnabled: boolean; onComplete: () => void };
 
 class SceneBoundary extends Component<{ children: ReactNode; onFailure: () => void }, { failed: boolean }> {
   state = { failed: false };
@@ -16,7 +18,7 @@ class SceneBoundary extends Component<{ children: ReactNode; onFailure: () => vo
   render() { return this.state.failed ? null : this.props.children; }
 }
 
-export function RoseBloom({ stage, motionEnabled, onComplete }: Props) {
+export function RoseBloom({ stage, kind, motionEnabled, onComplete }: Props) {
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
   const [supported, setSupported] = useState(false);
@@ -43,12 +45,13 @@ export function RoseBloom({ stage, motionEnabled, onComplete }: Props) {
     setDebugCommand((prior) => ({ kind, value, nonce: (prior?.nonce ?? 0) + 1 }));
     if (value !== undefined) setDebugProgress(value);
   }
-  const staticVisible = !motionEnabled || !supported || !ready || failed;
+  const staticVisible = !supported || !ready || failed;
   const finalPose = stage === "greeting" || !motionEnabled || failed || (checked && !supported);
   return <div className="rose-bloom" data-rose-renderer={staticVisible ? "static" : "webgl"}>
-    {staticVisible && <div className="static-rose-fallback" aria-hidden="true"><img src={finalPose ? "rose-bloom.webp" : "rose-bud.webp"} alt="" /></div>}
-    {motionEnabled && supported && !failed && <SceneBoundary onFailure={() => setFailed(true)}>
-      <RoseCanvas stage={stage} quality={quality} wireframe={wireframe} showPrimary={showPrimary} showSecondary={showSecondary}
+    {staticVisible && <StaticFlowerFallback kind={kind} open={finalPose} />}
+    {kind === "rose" && motionEnabled && supported && !failed && !debug && (stage === "invitation" || stage === "personalization" || stage === "blooming") && <div className={`rose-bud-reference ${stage === "blooming" ? "is-opening" : ""}`} aria-hidden="true"><img src="rose-bud-reference.png" alt="" /></div>}
+    {supported && !failed && <SceneBoundary onFailure={() => setFailed(true)}>
+      <RoseCanvas kind={kind} stage={stage} staticPose={!motionEnabled} quality={quality} wireframe={wireframe} showPrimary={showPrimary} showSecondary={showSecondary}
         debugCommand={debugCommand} onReady={() => setReady(true)} onComplete={onComplete} onFailure={() => setFailed(true)}
         onDebugProgress={debug ? setDebugProgress : undefined} />
     </SceneBoundary>}

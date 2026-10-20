@@ -31,6 +31,9 @@ jobs:
           GITHUB_PAGES: "true"
           NEXT_PUBLIC_ANALYTICS_ENABLED: ${{ vars.NEXT_PUBLIC_ANALYTICS_ENABLED }}
           NEXT_PUBLIC_ANALYTICS_ENDPOINT: ${{ vars.NEXT_PUBLIC_ANALYTICS_ENDPOINT }}
+          NEXT_PUBLIC_COUNTER_ENABLED: ${{ vars.NEXT_PUBLIC_COUNTER_ENABLED }}
+          NEXT_PUBLIC_COUNTER_ENDPOINT: ${{ vars.NEXT_PUBLIC_COUNTER_ENDPOINT }}
+          NEXT_PUBLIC_GUIDE_ENDPOINT: ${{ vars.NEXT_PUBLIC_GUIDE_ENDPOINT }}
       - run: touch out/.nojekyll
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4

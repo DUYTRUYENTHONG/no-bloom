@@ -20,7 +20,7 @@ const words = {
 export function AnalyticsPreference({ locale }: { locale: Locale }) {
   const [consent, setConsent] = useState<Consent>("unknown");
   const [open, setOpen] = useState(false);
-  const available = process.env.NEXT_PUBLIC_ANALYTICS_ENABLED === "true" && Boolean(process.env.NEXT_PUBLIC_ANALYTICS_ENDPOINT);
+  const available = (process.env.NEXT_PUBLIC_ANALYTICS_ENABLED === "true" && Boolean(process.env.NEXT_PUBLIC_ANALYTICS_ENDPOINT)) || process.env.NEXT_PUBLIC_COUNTER_ENABLED === "true";
   useEffect(() => {
     if (!available) return;
     const tracker = getPageViewTracker();

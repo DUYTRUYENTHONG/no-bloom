@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { copy, type Locale } from "./content";
+import { flowerCatalog, type FlowerKind } from "./flower-catalog";
 
 export const botanicalStates = ["BUD", "SPROUT", "BLOOMING", "FULL_BLOOM", "WITHER_RELOAD"] as const;
 export const componentCatalog = ["FloralGreeting"] as const;
@@ -22,6 +23,7 @@ export const generativeUiResponseSchema = z.strictObject({
         locale: z.enum(["vi", "en"]),
         recipient: z.string().nullable(),
         message: z.string().min(1),
+        flower: z.enum(["rose", "peach-rose", "peony", "cherry", "lily", "alstroemeria", "orchid"]),
       }),
       interactive: z.boolean(),
     }),
@@ -39,22 +41,22 @@ const timing: Record<BotanicalState, { growthRate: number; transitionDurationMs:
   WITHER_RELOAD: { growthRate: 0, transitionDurationMs: 450 },
 };
 
-export function createBotanicalResponse(state: BotanicalState, locale: Locale, recipient: string | null): GenerativeUiResponse {
+export function createBotanicalResponse(state: BotanicalState, locale: Locale, recipient: string | null, flower: FlowerKind = "rose"): GenerativeUiResponse {
   const message = recipient ? copy[locale].namedHeading(recipient) : copy[locale].genericHeading;
   return generativeUiResponseSchema.parse({
     type: "GENERATIVE_UI_RESPONSE",
     botanicalState: state,
     animationConfig: {
       ...timing[state],
-      petalCount: 64,
-      primaryColor: state === "WITHER_RELOAD" ? "#A68F79" : "#F12682",
+      petalCount: flower === "peony" ? 78 : flower === "rose" || flower === "peach-rose" ? 64 : flower === "orchid" ? 14 : 12,
+      primaryColor: state === "WITHER_RELOAD" ? "#A68F79" : flowerCatalog[flower].petal,
       secondaryColor: state === "WITHER_RELOAD" ? "#D9CCB8" : "#D2E87B",
     },
     componentSpec: {
       name: "FloralGreeting",
       props: {
         title: message,
-        data: { locale, recipient, message },
+        data: { locale, recipient, message, flower },
         interactive: state === "FULL_BLOOM",
       },
     },
