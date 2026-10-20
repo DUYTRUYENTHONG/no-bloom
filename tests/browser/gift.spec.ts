@@ -37,3 +37,29 @@ test("320px reduced-motion view has no horizontal overflow", async ({ page }) =>
   await page.getByRole("button", { name: "Tiếp tục không cần tên" }).click();
   await expect(page.getByRole("heading", { name: "Chúc bạn một ngày 20/10 thật dịu dàng." })).toBeVisible();
 });
+
+test("botanical payloads follow the gift lifecycle and use the approved FloralGreeting component", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.addInitScript(() => {
+    (window as typeof window & { botanicalPayloads: unknown[] }).botanicalPayloads = [];
+    window.addEventListener("no-bloom:a2ui", (event) => {
+      (window as typeof window & { botanicalPayloads: unknown[] }).botanicalPayloads.push((event as CustomEvent).detail);
+    });
+  });
+  await page.goto("/");
+  await expect(page.locator("main[data-botanical-state='BUD']")).toBeVisible();
+  await page.getByRole("button", { name: "Mở món quà" }).click();
+  await expect(page.locator("main[data-botanical-state='SPROUT']")).toBeVisible();
+  await page.getByRole("button", { name: "Để hoa nở vì bạn" }).click();
+  await expect(page.locator("main[data-botanical-state='WITHER_RELOAD']")).toBeVisible();
+  await page.getByRole("textbox", { name: "Tên bạn thích" }).fill("Mai");
+  await page.getByRole("button", { name: "Để hoa nở vì bạn" }).click();
+  await expect(page.locator("main[data-botanical-state='BLOOMING']")).toBeVisible();
+  await page.getByRole("button", { name: "Mở ngay" }).click();
+  await expect(page.locator("main[data-botanical-state='FULL_BLOOM']")).toBeVisible();
+  await page.getByRole("button", { name: "Xem hoa nở lại" }).click();
+  await expect(page.locator("main[data-botanical-state='BLOOMING']")).toBeVisible();
+  const payloads = await page.evaluate(() => (window as typeof window & { botanicalPayloads: Array<{ type: string; botanicalState: string; componentSpec: { name: string } }> }).botanicalPayloads);
+  expect(payloads.map((payload) => payload.botanicalState)).toEqual(expect.arrayContaining(["BUD", "SPROUT", "WITHER_RELOAD", "BLOOMING", "FULL_BLOOM"]));
+  expect(payloads.every((payload) => payload.type === "GENERATIVE_UI_RESPONSE" && payload.componentSpec.name === "FloralGreeting")).toBe(true);
+});

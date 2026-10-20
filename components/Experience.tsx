@@ -3,11 +3,13 @@
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { copy, type Locale } from "@/lib/content";
+import { createBotanicalResponse, type BotanicalState } from "@/lib/botanical-ui";
 import { validateName } from "@/lib/name";
+import { FloralGreeting } from "./FloralGreeting";
 import { StaticFlower } from "./StaticFlower";
 
 const FlowerScene = dynamic(() => import("./FlowerScene").then((module) => module.FlowerScene), { ssr: false, loading: () => <StaticFlower /> });
-type Stage = "invitation" | "personalization" | "blooming" | "greeting";
+type Stage = "invitation" | "personalization" | "blooming" | "greeting" | "withering";
 
 export function Experience() {
   const [locale, setLocale] = useState<Locale>("vi");
@@ -21,7 +23,15 @@ export function Experience() {
   const [webglFailed, setWebglFailed] = useState(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingAction = useRef<"replay" | "restart" | null>(null);
   const t = copy[locale];
+  const botanicalState: BotanicalState = error ? "WITHER_RELOAD" : stage === "invitation" ? "BUD" : stage === "personalization" ? "SPROUT" : stage === "blooming" ? "BLOOMING" : stage === "withering" ? "WITHER_RELOAD" : "FULL_BLOOM";
+  const payload = createBotanicalResponse(botanicalState, locale, name);
+  const bloomDurationMs = createBotanicalResponse("BLOOMING", locale, name).animationConfig.transitionDurationMs;
+
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("no-bloom:a2ui", { detail: payload }));
+  }, [payload.botanicalState, payload.componentSpec.props.data.locale, payload.componentSpec.props.data.recipient, staticMode, reducedMotion, webglFailed]);
 
   useEffect(() => {
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -44,12 +54,13 @@ export function Experience() {
   useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
 
   function startBloom(selectedName: string | null) {
+    if (timer.current) clearTimeout(timer.current);
     setName(selectedName);
     setError("");
     setReplayKey((key) => key + 1);
     setStage("blooming");
     if (staticMode || reducedMotion || webglFailed) timer.current = setTimeout(finish, 250);
-    else timer.current = setTimeout(finish, 3400);
+    else timer.current = setTimeout(finish, bloomDurationMs + 700);
   }
 
   function submitName(event: React.FormEvent<HTMLFormElement>) {
@@ -60,16 +71,29 @@ export function Experience() {
     startBloom(result.value);
   }
 
-  function replay() { startBloom(name); }
+  function replay() { beginWither("replay"); }
+  function beginWither(action: "replay" | "restart") {
+    if (timer.current) clearTimeout(timer.current);
+    pendingAction.current = action;
+    setStage("withering");
+    if (staticMode || reducedMotion || webglFailed) timer.current = setTimeout(finishWither, 0);
+    else timer.current = setTimeout(finishWither, 450);
+  }
+  function finishWither() {
+    const action = pendingAction.current;
+    pendingAction.current = null;
+    if (action === "replay") startBloom(name);
+    else if (action === "restart") clearName();
+  }
   function clearName() {
     setInput(""); setName(null); setError(""); setStage("personalization");
     try { sessionStorage.removeItem("no-bloom-name"); } catch { /* storage unavailable */ }
   }
 
-  const isOpen = stage === "blooming" || stage === "greeting";
+  const isOpen = stage === "blooming" || stage === "greeting" || stage === "withering";
   const showStatic = staticMode || reducedMotion || webglFailed;
 
-  return <main className={`experience stage-${stage}`}>
+  return <main className={`experience stage-${stage}`} data-botanical-state={botanicalState} data-ui-component={payload.componentSpec.name}>
     <div className="page-wash" aria-hidden="true" />
     <header className="site-header">
       <div className="brand" aria-label="NỞ">NỞ<span className="brand-mark">✳</span></div>
@@ -104,20 +128,16 @@ export function Experience() {
           <h1>{t.preparing}</h1>
           <button className="text-button skip-button" onClick={finish}>{t.skip}<span aria-hidden="true">→</span></button>
         </div>}
-        {stage === "greeting" && <div className="story-content greeting-content">
-          <p className="overline">A FLOWER, JUST FOR YOU</p>
-          <h1 ref={headingRef} tabIndex={-1}>{name ? <><span className="recipient-name">{name},</span> {locale === "vi" ? "chúc bạn một ngày 20/10 thật dịu dàng." : "wishing you a gentle Vietnamese Women’s Day."}</> : t.genericHeading}</h1>
-          <div className="letter"><span className="quote-mark" aria-hidden="true">“</span><p>{t.letter}</p><p className="signoff">{t.signoff}</p></div>
-          <div className="greeting-actions"><button className="primary-button" onClick={replay}>{t.replay}<span aria-hidden="true">↺</span></button><button className="text-button" onClick={clearName}>{t.restart}</button></div>
-        </div>}
+        {stage === "greeting" && <FloralGreeting payload={payload} ref={headingRef} onReplay={replay} onRestart={() => beginWither("restart")} />}
+        {stage === "withering" && <div className="story-content blooming-content" aria-hidden="true"><p className="overline">A FLOWER, JUST FOR YOU</p><h1>{t.preparing}</h1></div>}
         <div className="story-footer"><span>MADE TO BLOOM · 20.10</span><span className="footer-rule" /></div>
       </section>
 
       <section className="flower-panel" aria-label={t.flowerDescription}>
         <div className="flower-halo" aria-hidden="true" />
         <div className="flower-frame">
-          {showStatic ? <StaticFlower open={isOpen} /> : <FlowerScene animating={stage === "blooming"} opened={isOpen} replayKey={replayKey} onSettled={finish} onFailure={() => { setWebglFailed(true); if (stage === "blooming") finish(); }} />}
-          <img className={`rose-photo ${stage === "greeting" ? "is-visible" : ""}`} src="fuchsia-roses.png" alt="" aria-hidden="true" width="1024" height="1536" decoding="async" />
+          {showStatic ? <StaticFlower open={isOpen} /> : <FlowerScene animating={stage === "blooming"} contracting={botanicalState === "WITHER_RELOAD"} sprouting={stage === "personalization"} opened={isOpen} durationMs={bloomDurationMs} replayKey={replayKey} onSettled={finish} onFailure={() => { setWebglFailed(true); if (stage === "blooming") finish(); }} />}
+          <img className={`rose-photo ${stage === "greeting" || stage === "withering" ? "is-visible" : ""}`} src="fuchsia-roses.png" alt="" aria-hidden="true" width="1024" height="1536" decoding="async" />
         </div>
         <div className="flower-caption"><span className="caption-line" /><span>01 / 01</span><span className="caption-name">ROSES IN BLOOM</span></div>
         <button className="mode-button" onClick={() => setStaticMode((value) => !value)} disabled={reducedMotion || webglFailed} aria-label={showStatic ? t.animated : t.static}>{showStatic ? t.animated : t.static}</button>

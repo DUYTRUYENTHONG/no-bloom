@@ -13,3 +13,9 @@ GitHub Pages publishes this service-free slice with a build-only `GITHUB_PAGES=t
 The floral geometry, SVG illustration, and CSS are original project code. The fuchsia rose cutout is an AI-generated project asset based on the user-provided visual reference; it is displayed after the 3D reveal and in the still greeting. Google Fonts serves DM Sans and Playfair Display, both licensed under the SIL Open Font License. No audio or stock photos are used.
 
 The AI writer instruction is preserved in [ai-greeting-writer.md](ai-greeting-writer.md) for Slice 2; Slice 1 makes no provider call.
+
+## Botanical UI contract
+
+The gift now emits a validated `GENERATIVE_UI_RESPONSE` envelope as a `no-bloom:a2ui` browser `CustomEvent` whenever its meaningful UI state changes. The sole approved component in this site's catalog is `FloralGreeting`. `BUD` covers the invitation, `SPROUT` the name step, `BLOOMING` the 2.7 second 3D reveal, `FULL_BLOOM` the interactive greeting, and `WITHER_RELOAD` a correction or replay/reset. Replay contracts the flower for 450 ms before it blooms again; reduced-motion and still-flower modes advance immediately. The contract validates component names, state, colors, timing, and greeting data with Zod before dispatch.
+
+This envelope follows the requested application schema; it is not the A2UI protocol's wire format (`createSurface`, `updateComponents`, and `updateDataModel`). An external A2UI host would need an adapter. The current gift uses local curated content and sends no name or message to a server.

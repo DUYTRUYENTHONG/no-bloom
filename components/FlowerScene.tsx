@@ -68,7 +68,7 @@ function Flower({ position, scale, progress, color }: { position: [number, numbe
   </group>;
 }
 
-function Bouquet({ animating, opened, replayKey, onSettled }: { animating: boolean; opened: boolean; replayKey: number; onSettled: () => void }) {
+function Bouquet({ animating, contracting, sprouting, opened, durationMs, replayKey, onSettled }: { animating: boolean; contracting: boolean; sprouting: boolean; opened: boolean; durationMs: number; replayKey: number; onSettled: () => void }) {
   const progress = useRef(0.02);
   const [visibleProgress, setVisibleProgress] = useState(0.02);
   const reported = useRef(false);
@@ -77,8 +77,11 @@ function Bouquet({ animating, opened, replayKey, onSettled }: { animating: boole
     if (opened && !animating && progress.current < 1) {
       progress.current = 1;
       setVisibleProgress(1);
+    } else if (sprouting && !opened) {
+      progress.current = 0.2;
+      setVisibleProgress(0.2);
     }
-  }, [opened, animating]);
+  }, [opened, animating, sprouting]);
   useFrame((_, delta) => {
     if (priorKey.current !== replayKey) {
       progress.current = 0;
@@ -86,8 +89,11 @@ function Bouquet({ animating, opened, replayKey, onSettled }: { animating: boole
       reported.current = false;
       priorKey.current = replayKey;
     }
-    if (animating && progress.current < 1) {
-      progress.current = Math.min(1, progress.current + Math.min(delta, 0.06) / 2.7);
+    if (contracting && progress.current > 0) {
+      progress.current = Math.max(0, progress.current - Math.min(delta, 0.06) / 0.45);
+      setVisibleProgress(progress.current);
+    } else if (animating && progress.current < 1) {
+      progress.current = Math.min(1, progress.current + Math.min(delta, 0.06) / (durationMs / 1000));
       setVisibleProgress(progress.current);
       if (progress.current === 1 && !reported.current) {
         reported.current = true;
@@ -112,14 +118,14 @@ function Bouquet({ animating, opened, replayKey, onSettled }: { animating: boole
   </>;
 }
 
-export function FlowerScene({ animating, opened, replayKey, onSettled, onFailure }: { animating: boolean; opened: boolean; replayKey: number; onSettled: () => void; onFailure: () => void }) {
+export function FlowerScene({ animating, contracting, sprouting, opened, durationMs, replayKey, onSettled, onFailure }: { animating: boolean; contracting: boolean; sprouting: boolean; opened: boolean; durationMs: number; replayKey: number; onSettled: () => void; onFailure: () => void }) {
   return <Canvas
     aria-hidden="true"
-    frameloop={animating ? "always" : "demand"}
+    frameloop={animating || contracting ? "always" : "demand"}
     dpr={[1, 1.7]}
     camera={{ position: [0, 0, 7.2], fov: 42 }}
     gl={{ antialias: true, alpha: true, powerPreference: "low-power" }}
     onCreated={({ gl }) => gl.domElement.addEventListener("webglcontextlost", onFailure, { once: true })}
     onError={onFailure}
-  ><Bouquet animating={animating} opened={opened} replayKey={replayKey} onSettled={onSettled} /></Canvas>;
+  ><Bouquet animating={animating} contracting={contracting} sprouting={sprouting} opened={opened} durationMs={durationMs} replayKey={replayKey} onSettled={onSettled} /></Canvas>;
 }

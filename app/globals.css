@@ -100,6 +100,10 @@ input:focus{border-color:#e0f395;box-shadow:0 2px 0 #e0f395}
 .mode-note{color:#c7d5a5}
 .rose-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;z-index:2;pointer-events:none;opacity:0;transform:translateY(22px) scale(.94);transition:opacity .65s ease,transform .8s cubic-bezier(.2,.7,.2,1);filter:brightness(1.12) saturate(1.12) drop-shadow(0 30px 28px #0009)}
 .rose-photo.is-visible{opacity:1;transform:translateY(0) scale(1.07)}
+.stage-withering .rose-photo.is-visible{opacity:0;transform:translateY(24px) scale(.72);transition-duration:.45s}
+.stage-withering .flower-frame canvas,.stage-withering .static-flower{filter:grayscale(.75) sepia(.2)}
+.stage-personalization .static-flower{transform:scale(1.04)}
+[data-botanical-state="WITHER_RELOAD"] .field-error{color:#eec290}
 .stage-greeting .flower-frame canvas,.stage-greeting .flower-frame .static-flower{opacity:0}
 .static-flower{filter:drop-shadow(0 18px 20px #0007)}
 @media(max-width:800px){.site-header{border-bottom:1px solid #b9cc7838}.flower-panel:before{top:3%;right:10%;font-size:clamp(100px,28vw,190px)}.flower-panel{padding-bottom:22px}.story-panel{border-top:1px solid #b6ca7130;padding-top:24px}.letter{margin-top:24px}.rose-photo{object-position:center 42%}.rose-photo.is-visible{transform:translateY(0) scale(1.23)}}
