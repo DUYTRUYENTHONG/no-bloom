@@ -22,4 +22,4 @@ Personal share links and the optional Groq guide are documented in [personal lin
 
 Optional visitor analytics is prepared separately for Supabase and remains disabled until configured and deployed. See [visitor analytics](docs/visitor-analytics.md).
 
-The optional traffic counter is prepared for Vercel + Upstash Redis and disabled until connected. It reports consenting page views and approximate unique browsers in a small top-left header display. It honors existing permission and Global Privacy Control, sends no role/name/greeting, and has private local reporting. See [visitor counter](docs/visitor-counter.md).
+The optional traffic counter reuses the existing `ali-portfolio-visitor-api` and shared Upstash database, with public project ID `no-bloom`. The shared API and its independent project secret are configured; the Pages release receives only public endpoint/enabled/project-ID values. It reports consenting page views and approximate unique browsers in a small top-left display, respects consent/GPC, and sends no role/name/greeting. See [visitor counter](docs/visitor-counter.md).

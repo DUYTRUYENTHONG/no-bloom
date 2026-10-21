@@ -1,13 +1,28 @@
 import assert from 'node:assert/strict';import{createServer}from'node:http';import{readFile}from'node:fs/promises';import{resolve,extname,sep}from'node:path';import{chromium,expect}from'@playwright/test';import AxeBuilder from'@axe-core/playwright';
 const root=resolve('out'),events=new Map(),browsers=new Set(),requests=[];let reads=0,loseFirst=true,unavailable=false;
+// Optional vertical-slice mode: actual shared handler and Redis, isolated keys only.
+let sharedHandler=null,cleanShared=async()=>{};
+if(process.env.TRAFFIC_SHARED_API_TEST_PATH){
+ const{pathToFileURL}=await import('node:url'),{createRequire}=await import('node:module'),{randomUUID}=await import('node:crypto');
+ const apiRoot=resolve(process.env.TRAFFIC_SHARED_API_TEST_PATH),load=p=>import(pathToFileURL(resolve(apiRoot,p)).href);
+ const[{createTrafficHandler},{trafficOperation},{projectDefinitions}]=await Promise.all([load('api/traffic.js'),load('lib/traffic-store.js'),load('lib/traffic-projects.js')]);
+ const{Redis}=createRequire(resolve(apiRoot,'package.json'))('@upstash/redis');
+ assert.ok(process.env.KV_REST_API_URL&&process.env.KV_REST_API_TOKEN,'Isolated-test Redis connection required');
+ const redis=new Redis({url:process.env.KV_REST_API_URL,token:process.env.KV_REST_API_TOKEN,retry:false,signal:()=>AbortSignal.timeout(5000)});
+ const scope='test-'+randomUUID(),namespace=`traffic:no-bloom:${scope}:v1`,prefixes=[namespace,`traffic:shared:${scope}:v1`];
+ const guarded={eval:async(script,keys,args)=>{assert.ok(keys.every(k=>prefixes.some(p=>k.startsWith(p+':'))));return redis.eval(script,keys,args)}};
+ sharedHandler=createTrafficHandler({env:{KV_REST_API_URL:process.env.KV_REST_API_URL,KV_REST_API_TOKEN:process.env.KV_REST_API_TOKEN,TRAFFIC_NO_BLOOM_HASH_SALT:randomUUID(),VERCEL_ENV:'preview'},definitions:{'no-bloom':{...projectDefinitions['no-bloom'],origins:['http://127.0.0.1:3204']}},makeRedis:()=>guarded,operation:(client,project,mode,event,time,limits)=>trafficOperation(client,{...project,scope,namespace},mode,event,time,limits)});
+ cleanShared=async()=>{for(const prefix of prefixes){let cursor='0',seen=0;do{const[next,keys]=await redis.scan(cursor,{match:prefix+':*',count:200});cursor=String(next);assert.ok(keys.every(k=>k.startsWith(prefix+':')));seen+=keys.length;assert.ok(seen<=5000);if(keys.length)await redis.del(...keys);}while(cursor!=='0');}};
+}
 const mime={'.html':'text/html','.js':'application/javascript','.css':'text/css','.webp':'image/webp','.png':'image/png','.svg':'image/svg+xml','.woff2':'font/woff2','.mp4':'video/mp4'};
 const collector=createServer(async(req,res)=>{
  res.setHeader('Access-Control-Allow-Origin','http://127.0.0.1:3204');res.setHeader('Access-Control-Allow-Methods','GET, POST, OPTIONS');res.setHeader('Access-Control-Allow-Headers','content-type');res.setHeader('Cache-Control','no-store');res.setHeader('Content-Type','application/json');
  if(req.method==='OPTIONS'){res.writeHead(204).end();return;}
  if(unavailable){res.writeHead(503).end('{}');return;}
- if(req.method==='GET'){reads++;res.end(JSON.stringify({pageViews:events.size,uniqueBrowsers:browsers.size}));return;}
+ if(req.method==='GET'){assert.equal(new URL(req.url,'http://local').searchParams.get('projectId'),'no-bloom');reads++;if(sharedHandler){const reply=await sharedHandler(new Request('http://127.0.0.1:3205'+req.url,{headers:{Origin:'http://127.0.0.1:3204'}}));assert.equal(reply.status,200);res.end(await reply.text());}else res.end(JSON.stringify({pageViews:events.size,uniqueBrowsers:browsers.size}));return;}
  if(req.method!=='POST'){res.writeHead(405).end();return;}
- let bytes='';for await(const c of req)bytes+=c;const p=JSON.parse(bytes);assert.deepEqual(Object.keys(p).sort(),['eventId','path','visitorId']);assert.ok(['/','/credits'].includes(p.path));requests.push(p);if(!events.has(p.eventId)){events.set(p.eventId,p);browsers.add(p.visitorId);}
+ let bytes='';for await(const c of req)bytes+=c;const p=JSON.parse(bytes);assert.deepEqual(Object.keys(p).sort(),['eventId','path','projectId','visitorId']);assert.equal(p.projectId,'no-bloom');assert.ok(['/','/credits'].includes(p.path));requests.push(p);if(!events.has(p.eventId)){events.set(p.eventId,p);browsers.add(p.visitorId);}
+ if(sharedHandler){const reply=await sharedHandler(new Request('http://127.0.0.1:3205/api/traffic',{method:'POST',headers:{Origin:'http://127.0.0.1:3204','Content-Type':'application/json'},body:bytes}));assert.equal(reply.status,200);assert.deepEqual(await reply.json(),{recorded:true});}
  if(loseFirst){loseFirst=false;res.writeHead(503).end('{}');return;}res.end('{"recorded":true}');
 });
 const site=createServer(async(req,res)=>{const pathname=new URL(req.url,'http://localhost').pathname;const relative=decodeURIComponent(pathname.replace(/^\/no-bloom\/?/,''))||'index.html',file=resolve(root,relative.endsWith('/')?relative+'index.html':relative);if(!file.startsWith(root+sep)){res.writeHead(403).end();return;}try{res.setHeader('Content-Type',mime[extname(file)]??'application/octet-stream');res.end(await readFile(file));}catch{res.writeHead(404).end();}});
@@ -25,5 +40,5 @@ try{
  const storage=await browser.newContext({reducedMotion:'reduce'});await storage.addInitScript(()=>{for(const method of['getItem','setItem','removeItem'])Object.defineProperty(Storage.prototype,method,{configurable:true,value(){throw Error('blocked')}})});const temp=await storage.newPage();await temp.goto(url);await temp.getByRole('button',{name:'Đồng ý'}).click();await count(6);assert.equal(browsers.size,3);await temp.reload();await temp.waitForTimeout(100);assert.equal(events.size,6);await storage.close();
  const gpc=await browser.newContext({reducedMotion:'reduce'});await gpc.addInitScript(()=>{Object.defineProperty(navigator,'globalPrivacyControl',{value:true});localStorage.setItem('no-bloom:analytics-consent','accepted')});const privatePage=await gpc.newPage();const before=requests.length,beforeReads=reads;await privatePage.goto(url);await privatePage.locator('.header-brand').waitFor();await privatePage.waitForTimeout(100);assert.equal(requests.length,before);assert.equal(reads,beforeReads);await gpc.close();
  unavailable=true;const failed=await browser.newContext({reducedMotion:'reduce'}),gift=await failed.newPage();await gift.goto(url);await gift.getByRole('button',{name:'Đồng ý'}).click();await gift.getByRole('button',{name:'Mở món quà'}).click();await gift.getByRole('textbox',{name:'Tên của bạn'}).fill('QA');await gift.getByRole('button',{name:'Để hoa nở vì bạn'}).click();await expect(gift.getByRole('heading',{name:/QA, chúc bạn/})).toBeVisible();await failed.close();
- console.log('Exported traffic: consent/GPC, lost-response retry, reload, normalized native history navigation/hash exclusion, browser contexts, storage failure, withdrawal, top-left layout/axe and gift isolation passed. Isolated local mock collector only.');
-}finally{await browser.close();await Promise.all([new Promise(r=>collector.close(r)),new Promise(r=>site.close(r))]);}
+ console.log('Exported traffic: consent/GPC, lost-response retry, reload, normalized native history navigation/hash exclusion, browser contexts, storage failure, withdrawal, top-left layout/axe and gift isolation passed. '+(sharedHandler?'Actual shared API handler + real Redis; random isolated prefixes cleaned.':'Isolated local mock collector only.'));
+}finally{await browser.close();await Promise.all([new Promise(r=>collector.close(r)),new Promise(r=>site.close(r))]);await cleanShared();}

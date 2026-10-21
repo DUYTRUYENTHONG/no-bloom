@@ -1,6 +1,33 @@
 # NỞ traffic counter — Vercel + Upstash Redis
 
-## Activation status (2026-10-21)
+## Shared API integration (2026-10-21)
+
+Release authorized after review: shared API commit `81b11a2` is deployed at the endpoint below. The new project secret is configured independently of portfolio secrets. Production-safe GET returned real zero totals before activation; legacy visit/guide method checks passed without adding a visitor or generating a model request. GitHub public configuration is set for the next Pages publication. The Pages workflow must complete before claiming the frontend is live. No synthetic production visit is part of these checks.
+
+The current candidate reuses the existing `ali-portfolio-visitor-api` and its `ali-portfolio-visitors` database. It adds `projectId:no-bloom` to POSTs and `?projectId=no-bloom` to public aggregate reads. New server keys use `traffic:no-bloom:<scope>:v1:*`; portfolio `portfolio:*` keys and the legacy `/api/visit` and `/api/guide` endpoints are preserved. No new account, API project or database is needed. The earlier standalone service described below is superseded and must not be the new deployment target.
+
+Frontend public variables:
+
+```dotenv
+NEXT_PUBLIC_COUNTER_ENABLED=true
+NEXT_PUBLIC_COUNTER_ENDPOINT=https://ali-portfolio-visitor-api.vercel.app/api/traffic
+NEXT_PUBLIC_COUNTER_PROJECT_ID=no-bloom
+NEXT_PUBLIC_ANALYTICS_ENABLED=false
+```
+
+The existing server connection is configured on that shared project. Only a new, independent `TRAFFIC_NO_BLOOM_HASH_SALT` must be configured before deploying the candidate. Do not reuse its portfolio visitor or guide secrets. Secret values and Redis credentials never enter this repository's frontend configuration.
+
+The inspected shared source is `C:/Users/CROSSIAN/Documents/Codex/2026-10-14/files-pasted-by-the-user-role/outputs/ai-data-ecommerce-portfolio/visitor-api`. Its `TRAFFIC_INTEGRATION.md` is the authoritative registry, reporting, deletion, retention, shared-capacity and release guide. Its scripts require local owner Redis credentials and `TRAFFIC_REPORT_PROJECTS=no-bloom` authorization; no public detailed report endpoint exists.
+
+Candidate limits:60 NỞ requests/minute and500/day,120 shared requests/minute and1000/day, including GETs and retries. The overall limit covers all projects using the new traffic endpoint; existing portfolio/guide behavior remains independent. Production origin is exactly `https://duytruyenthong.github.io`. Local `http://localhost:3100` is allowed only with explicit server development enablement outside production. Preview/development/test keys stay separate. Scope-qualified keys retain lifetime browser membership,400-day daily views/membership and24-hour event markers; TTL needs no scheduler.
+
+The browser keeps optional consent, GPC, project-specific random ID storage,30-day browser expiry, temporary memory fallback, stable retry IDs and bounded retries. Full reload and eligible route changes count; remounts/BFCache/hash-only changes do not. Permitted paths remain `/` and `/credits`. Counts are approximate recorded consenting traffic, not people; no role, name, greeting, token or full URL is sent.
+
+The Pages workflow accepts the public project ID. The shared backend is released first, then Pages is rebuilt with the public values above. Verify an authorized production event separately; automated tests use isolated prefixes/local collectors. Roll back by disabling the public flag and restoring the prior API deployment while retaining Redis history. No database reset or migration of portfolio data is part of release.
+
+The historical standalone implementation and its old private reporting script below are retained as reference only. Use the shared API's `scripts/report-traffic.mjs` for the new namespace and distinct interval reports.
+
+## Earlier standalone activation (superseded)
 
 The standalone backend is deployed at `https://no-bloom-counter.vercel.app/api/traffic`, in Vercel project `no-bloom-counter`. Its production origin, namespace, caps and stable server-only hash secret are configured. The owner selected an existing Upstash database; its `KV_REST_API_URL` and `KV_REST_API_TOKEN` still need to be added in the project's Production environment. A safe GET currently returns503 `service_not_configured`; no production visit has been inserted.
 

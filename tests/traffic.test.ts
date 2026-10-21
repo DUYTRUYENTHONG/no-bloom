@@ -25,7 +25,7 @@ function fixture(options: Record<string, unknown> = {}) {
     let fail = 0;
     const timers = new Map<number, () => void>();
     let next = 1;
-    const tracker = new TrafficTracker({ enabled: true, endpoint: 'https://traffic.example/api/traffic', isProduction: true, hostname: 'duytruyenthong.github.io', document: doc, storage, randomUUID, fetcher: async (_url, init) => { const body = init?.body ? JSON.parse(String(init.body)) : null; requests.push({ method: init?.method ?? 'GET', body }); if (init?.method === 'POST') {
+    const tracker = new TrafficTracker({ projectId: 'no-bloom', enabled: true, endpoint: 'https://traffic.example/api/traffic', isProduction: true, hostname: 'duytruyenthong.github.io', document: doc, storage, randomUUID, fetcher: async (_url, init) => { const body = init?.body ? JSON.parse(String(init.body)) : null; requests.push({ method: init?.method ?? 'GET', body }); if (init?.method === 'POST') {
             if (fail-- > 0)
                 return new Response('{}', { status: 503 });
             events.add(body.eventId);
@@ -42,7 +42,7 @@ test('traffic page instances survive remounts; route changes count, query/hash c
     visitorId: string;
     eventId: string;
     path: string;
-}); assert.equal(posts.length, 3); assert.equal(new Set(posts.map(p => p.eventId)).size, 3); assert.equal(new Set(posts.map(p => p.visitorId)).size, 1); assert.deepEqual(posts.map(p => p.path), ['/', '/credits', '/']); assert.ok(posts.every(p => Object.keys(p).sort().join(',') === 'eventId,path,visitorId')); });
+}); assert.equal(posts.length, 3); assert.equal(new Set(posts.map(p => p.eventId)).size, 3); assert.equal(new Set(posts.map(p => p.visitorId)).size, 1); assert.deepEqual(posts.map(p => p.path), ['/', '/credits', '/']); assert.ok(posts.every(p => Object.keys(p).sort().join(',') === 'eventId,path,projectId,visitorId')); });
 test('traffic reload gets a new event but reuses the unexpired browser ID; another storage gets another ID', async () => { const f = fixture(); f.tracker.setConsent('accepted'); await tick(); const g = fixture({ storage: f.storage }); g.tracker.setConsent('accepted'); await tick(); const h = fixture(); h.tracker.setConsent('accepted'); await tick(); const a = f.requests[0].body as {
     visitorId: string;
     eventId: string;
@@ -111,3 +111,5 @@ test('traffic Redis adapter uses one EVAL with server UTC keys, bounded namespac
     const rest = createRedisCommand('https://example.upstash.io', 'server-only-token', async (_url, init) => { assert.equal(new Headers(init?.headers).get('authorization'), 'Bearer server-only-token'); assert.ok(!String(init?.body).includes('server-only-token')); return Response.json({ result: [1] }); });
     assert.deepEqual(await rest(['EVAL', 'return {1}', 0]), [1]);
 });
+
+ test('traffic browser identities are separated by public project ID; missing project configuration sends nothing', async () => { const storage=new MemoryStorage();const a=fixture({storage,projectId:'no-bloom'}),b=fixture({storage,projectId:'second-site'});a.tracker.setConsent('accepted');b.tracker.setConsent('accepted');await tick();const first=a.requests.find(r=>r.method==='POST')!.body as {projectId:string;visitorId:string};const second=b.requests.find(r=>r.method==='POST')!.body as {projectId:string;visitorId:string};assert.equal(first.projectId,'no-bloom');assert.equal(second.projectId,'second-site');assert.notEqual(first.visitorId,second.visitorId);assert.ok(storage.getItem('no-bloom-visitor-id'));assert.ok(storage.getItem('second-site-visitor-id'));storage.setItem('-visitor-id','unrelated');const missing=fixture({projectId:'',storage});missing.tracker.setConsent('accepted');await tick();assert.equal(missing.requests.length,0);missing.tracker.setConsent('declined');assert.equal(storage.getItem('-visitor-id'),'unrelated'); });

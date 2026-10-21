@@ -12,6 +12,7 @@ export type TrafficState = {
 };
 type StorageLike = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
 type Options = {
+    projectId: string;
     enabled: boolean;
     endpoint: string;
     isProduction: boolean;
@@ -27,6 +28,7 @@ type Options = {
     clearTimeoutFn?: typeof clearTimeout;
 };
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+function validProjectId(value: string) { return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value) && value.length <= 48; }
 export function normalizedTrafficPath(pathname: string): '/' | '/credits' | null {
     let path = pathname.split(/[?#]/, 1)[0];
     if (path === '/no-bloom')
@@ -42,6 +44,7 @@ export function normalizedTrafficPath(pathname: string): '/' | '/credits' | null
 function validTotals(v: unknown): v is Totals { if (!v || typeof v !== 'object')
     return false; const t = v as Totals; return Number.isSafeInteger(t.pageViews) && t.pageViews >= 0 && Number.isSafeInteger(t.uniqueBrowsers) && t.uniqueBrowsers >= 0 && t.uniqueBrowsers <= t.pageViews; }
 export class TrafficTracker {
+    private get visitorKey() { if (!validProjectId(this.options.projectId)) throw Error('invalid_project_configuration'); return `${this.options.projectId}-visitor-id`; }
     private consent: Consent = 'unknown';
     private mounted = false;
     private identity: string | null = null;
@@ -75,7 +78,7 @@ export class TrafficTracker {
         this.cancel();
         this.identity = null;
         try {
-            this.options.storage?.removeItem(trafficVisitorKey);
+            this.options.storage?.removeItem(this.visitorKey);
         }
         catch { /* storage unavailable */ }
         this.update({ kind: 'idle' });
@@ -86,7 +89,7 @@ export class TrafficTracker {
     private cancel() { this.generation++; if (this.timer)
         this.clearTimer(this.timer); this.timer = null; this.abort?.abort(); this.abort = null; }
     private eligible() { const o = this.options; if (!o.enabled || !o.endpoint)
-        return false; try {
+        return false; if (!validProjectId(o.projectId)) return false; try {
         const u = new URL(o.endpoint);
         return u.protocol === 'https:' || Boolean(o.allowLocalTest && u.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(u.hostname));
     }
@@ -98,7 +101,7 @@ export class TrafficTracker {
         this.cancel();
         this.identity = null;
         try {
-            this.options.storage?.removeItem(trafficVisitorKey);
+            this.options.storage?.removeItem(this.visitorKey);
         }
         catch { /* storage unavailable */ }
         this.update({ kind: 'disabled' });
@@ -110,7 +113,7 @@ export class TrafficTracker {
             return this.identity;
         this.identity = null;
         try {
-            const p = JSON.parse(this.options.storage?.getItem(trafficVisitorKey) ?? 'null') as {
+            const p = JSON.parse(this.options.storage?.getItem(this.visitorKey) ?? 'null') as {
                 id: string;
                 expires: number;
             } | null;
@@ -126,7 +129,7 @@ export class TrafficTracker {
         this.identity = id.toLowerCase();
         this.identityExpires = this.now() + 30 * 86400000;
         try {
-            this.options.storage?.setItem(trafficVisitorKey, JSON.stringify({ id: this.identity, expires: this.identityExpires }));
+            this.options.storage?.setItem(this.visitorKey, JSON.stringify({ id: this.identity, expires: this.identityExpires }));
         }
         catch { /* memory only while permission is known */ }
         return this.identity;
@@ -173,7 +176,7 @@ export class TrafficTracker {
         const timeout = this.setTimer(() => controller.abort(), 5000);
         let retry: string | null | undefined;
         try {
-            const response = await this.options.fetcher(this.options.endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ visitorId, eventId: this.page.eventId, path: this.page.path }), credentials: 'omit', cache: 'no-store', mode: 'cors', keepalive: true, signal: controller.signal });
+            const response = await this.options.fetcher(this.options.endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ projectId: this.options.projectId, visitorId, eventId: this.page.eventId, path: this.page.path }), credentials: 'omit', cache: 'no-store', mode: 'cors', keepalive: true, signal: controller.signal });
             if (generation !== this.generation || !this.permitted())
                 return;
             if (response.ok) {
@@ -225,7 +228,9 @@ export class TrafficTracker {
         this.update({ kind: 'loading' });
         const timeout = this.setTimer(() => controller.abort(), 5000);
         try {
-            const response = await this.options.fetcher(this.options.endpoint, { method: 'GET', credentials: 'omit', mode: 'cors', cache: 'no-store', signal: controller.signal });
+            const endpoint = new URL(this.options.endpoint);
+            endpoint.searchParams.set('projectId', this.options.projectId);
+            const response = await this.options.fetcher(endpoint.href, { method: 'GET', credentials: 'omit', mode: 'cors', cache: 'no-store', signal: controller.signal });
             if (!response.ok)
                 throw Error('unavailable');
             const values: unknown = await response.json();
@@ -253,7 +258,7 @@ export function getTrafficTracker() { if (typeof window === 'undefined')
         storage = window.localStorage;
     }
     catch { /* memory fallback */ }
-    singleton = new TrafficTracker({ enabled: process.env.NEXT_PUBLIC_COUNTER_ENABLED === 'true', endpoint: process.env.NEXT_PUBLIC_COUNTER_ENDPOINT ?? '', isProduction: process.env.NODE_ENV === 'production', allowLocalTest: process.env.NEXT_PUBLIC_COUNTER_TEST_MODE === 'true', hostname: location.hostname, document, storage, fetcher: window.fetch.bind(window), randomUUID: () => crypto.randomUUID(), privacyControl: () => Boolean((navigator as Navigator & {
+    singleton = new TrafficTracker({ projectId: process.env.NEXT_PUBLIC_COUNTER_PROJECT_ID ?? '', enabled: process.env.NEXT_PUBLIC_COUNTER_ENABLED === 'true', endpoint: process.env.NEXT_PUBLIC_COUNTER_ENDPOINT ?? '', isProduction: process.env.NODE_ENV === 'production', allowLocalTest: process.env.NEXT_PUBLIC_COUNTER_TEST_MODE === 'true', hostname: location.hostname, document, storage, fetcher: window.fetch.bind(window), randomUUID: () => crypto.randomUUID(), privacyControl: () => Boolean((navigator as Navigator & {
             globalPrivacyControl?: boolean;
         }).globalPrivacyControl) });
 } return singleton; }
