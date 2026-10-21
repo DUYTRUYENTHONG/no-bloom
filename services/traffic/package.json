@@ -1,1 +1,1 @@
-{"name":"no-bloom-traffic","private":true,"type":"module","engines":{"node":"24.x"}}
+{"name":"no-bloom-traffic","private":true,"type":"module","engines":{"node":"24.x"},"devDependencies":{"@types/node":"24.19.2","typescript":"5.9.3"}}

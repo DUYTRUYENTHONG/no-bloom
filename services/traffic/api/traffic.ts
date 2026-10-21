@@ -1,5 +1,5 @@
-import { createTrafficHandler } from '../lib/handler';
-import { createRedisCommand, createTrafficStore } from '../lib/store';
+import { createTrafficHandler } from '../lib/handler.js';
+import { createRedisCommand, createTrafficStore } from '../lib/store.js';
 let handler: ReturnType<typeof createTrafficHandler> | undefined;
 export default { async fetch(request: Request) {
         try {

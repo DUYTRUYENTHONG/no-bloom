@@ -1,5 +1,13 @@
 # NỞ traffic counter — Vercel + Upstash Redis
 
+## Activation status (2026-10-21)
+
+The standalone backend is deployed at `https://no-bloom-counter.vercel.app/api/traffic`, in Vercel project `no-bloom-counter`. Its production origin, namespace, caps and stable server-only hash secret are configured. The owner selected an existing Upstash database; its `KV_REST_API_URL` and `KV_REST_API_TOKEN` still need to be added in the project's Production environment. A safe GET currently returns503 `service_not_configured`; no production visit has been inserted.
+
+The first deployment exposed standalone Node ESM import/type errors. Explicit `.js` module specifiers, a NodeNext service tsconfig and pinned TypeScript/Node definitions fix those errors. The subsequent Vercel build succeeds without TypeScript errors. CI now checks this service configuration independently of the frontend bundler.
+
+Keep the frontend disabled until the database is connected, isolated Redis verification succeeds and the deployed function returns real aggregates. Then set the public GitHub endpoint/enabled variables and publish Pages. No database was created, reset or replaced during this activation work. Local secret files and deployment metadata are ignored by Git and explicitly excluded from Vercel uploads.
+
 ## Inspected project and active architecture
 
 Next.js16.4.2/React19.2, TypeScript5.9, npm/package-lock, existing CSS and native fetch. The frontend is a static GitHub Pages export at `/no-bloom/`; production origin is `https://duytruyenthong.github.io`, local development is `http://localhost:3100`. There is no owner login. The active counter replaces the earlier, unprovisioned Supabase browser-only collector. Existing Supabase code is historical and is not deployed or used by this counter. No role picker or role field is sent.

@@ -1,4 +1,4 @@
-import { recordTrafficLua } from './lua';
+import { recordTrafficLua } from './lua.js';
 export type TrafficTotals = {
     pageViews: number;
     uniqueBrowsers: number;
