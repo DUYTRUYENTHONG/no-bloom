@@ -54,3 +54,9 @@ All automated writes used random isolated prefixes and were cleaned up. No produ
 5. Verify the public aggregate GET, one separately authorized consenting event, retry/reload behavior and history after another frontend publication. Keep ordinary automated tests isolated.
 
 Metrics are consenting recorded page views and estimated browsers, not verified people. Reports use UTC half-open dates. Country metrics count views. Shared capacity/failure, indefinite lifetime membership,400-day daily retention,24-hour deduplication,30-second client retry window and explicit deletion behavior are documented in the shared API guide.
+
+## Compact number and private city totals
+
+The header now displays only total page views, with a localized screen-reader label and tooltip. Consent copy names approximate city/country. Cities remain private aggregate data in the existing shared API report, grouped by country/city from trusted Vercel metadata, without stored IPs, coordinates or identity/location mappings. Historical visits cannot be assigned a city; report cityTrackingStartedAt marks the start. The existing public API contract and consent/GPC behavior are unchanged.
+
+Verification for this update: qa:fast passed; enabled Pages export passed; actual shared-handler + isolated Redis browser test passed (compact accessible number, 320px axe/layout, consent, retries, reload, withdrawal and gift isolation); default export passed; Chrome/WebKit journeys 111/111; accessibility 0 findings. Shared API tests 17/17, real Redis city deduplication/history compatibility/cardinality tests, Biome and Vercel production build passed. Production-safe reads preserve existing counts and validate the private report; no synthetic production views were inserted.

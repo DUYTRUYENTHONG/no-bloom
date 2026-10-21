@@ -7,12 +7,12 @@ import { getPageViewTracker, type Consent } from "@/lib/analytics/tracker";
 const words = {
   vi: {
     privacy: "Quyền riêng tư", title: "Phân tích lượt truy cập (tùy chọn)",
-    body: "Giúp cải thiện món quà này bằng số liệu sử dụng tùy chọn. Tên và lời chúc của bạn không được gửi đi.",
+    body: "Thống kê lượt xem, trình duyệt ước tính và thành phố/quốc gia gần đúng do nền tảng cung cấp. Không lưu IP, vị trí chính xác, tên hay lời chúc của bạn.",
     accept: "Đồng ý", decline: "Không, cảm ơn", close: "Đóng", previous: "Lựa chọn mới chỉ áp dụng cho các lượt truy cập sau. Dữ liệu đã ghi trước đó không tự động bị xóa.",
   },
   en: {
     privacy: "Privacy", title: "Optional visit analytics",
-    body: "Help improve this experience with optional usage analytics. Your name and greeting are not included.",
+    body: "Count page views, estimated browsers and approximate city/country supplied by the hosting platform. We do not store your IP, precise location, name or greeting.",
     accept: "Allow", decline: "No, thanks", close: "Close", previous: "Your new choice affects future tracking. Previously recorded data is not automatically deleted.",
   },
 };
